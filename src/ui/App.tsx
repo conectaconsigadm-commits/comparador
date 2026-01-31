@@ -1,12 +1,7 @@
+import { UploadScreen } from './screens/UploadScreen'
+
 function App() {
-  return (
-    <main>
-      <h1>Conecta Consig</h1>
-      <p className="subtitle">
-        Comparador de consignações entre Banco e Prefeitura
-      </p>
-    </main>
-  )
+  return <UploadScreen />
 }
 
 export default App
