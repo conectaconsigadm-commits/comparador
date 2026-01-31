@@ -10,6 +10,13 @@ import type {
 /** Tolerância para comparação de valores (1 centavo) */
 const TOLERANCE = 0.01
 
+/** Dados agrupados por matrícula */
+interface RowData {
+  valor: Money
+  nome?: string
+  cpf?: string
+}
+
 /**
  * Reconciliador de dados Banco × Prefeitura
  *
@@ -39,7 +46,7 @@ export class Reconciler {
     let soNaPrefeituraCount = 0
     let divergenteCount = 0
 
-    // Agrupar por matrícula
+    // Agrupar por matrícula (com metadados)
     const bankByMatricula = this.groupByMatricula(bankRows)
     const prefByMatricula = this.groupByMatricula(prefRows)
 
@@ -51,33 +58,33 @@ export class Reconciler {
 
     // Processar cada matrícula
     for (const matricula of todasMatriculas) {
-      const valoresBanco = bankByMatricula.get(matricula) || []
-      const valoresPref = prefByMatricula.get(matricula) || []
+      const dadosBanco = bankByMatricula.get(matricula) || []
+      const dadosPref = prefByMatricula.get(matricula) || []
 
       // Clonar arrays para manipulação (multiconjunto)
-      const bancoPendente = [...valoresBanco]
-      const prefPendente = [...valoresPref]
+      const bancoPendente = [...dadosBanco]
+      const prefPendente = [...dadosPref]
 
       // Fase 1: Match exato (com tolerância)
       for (let i = bancoPendente.length - 1; i >= 0; i--) {
-        const valorBanco = bancoPendente[i]
+        const dadoBanco = bancoPendente[i]
 
         // Buscar match na prefeitura
-        // Usar arredondamento para evitar problemas de ponto flutuante
-        const matchIndex = prefPendente.findIndex((v) => {
-          const diff = Math.abs(v - valorBanco)
-          // Arredondar para 2 casas decimais antes de comparar
+        const matchIndex = prefPendente.findIndex((d) => {
+          const diff = Math.abs(d.valor - dadoBanco.valor)
           return Math.round(diff * 100) / 100 <= TOLERANCE
         })
 
         if (matchIndex !== -1) {
-          const valorPref = prefPendente[matchIndex]
+          const dadoPref = prefPendente[matchIndex]
 
           items.push({
             matricula,
-            valorBanco,
-            valorPrefeitura: valorPref,
+            valorBanco: dadoBanco.valor,
+            valorPrefeitura: dadoPref.valor,
             status: 'bateu',
+            nome: dadoPref.nome,
+            cpf: dadoPref.cpf,
           })
           bateuCount++
 
@@ -90,23 +97,25 @@ export class Reconciler {
       // Fase 2: Sobras - tentar parear divergências
       if (bancoPendente.length > 0 && prefPendente.length > 0) {
         // Ordenar por valor para parear por proximidade
-        bancoPendente.sort((a, b) => a - b)
-        prefPendente.sort((a, b) => a - b)
+        bancoPendente.sort((a, b) => a.valor - b.valor)
+        prefPendente.sort((a, b) => a.valor - b.valor)
 
         // Parear por índice (divergentes)
         const pairsCount = Math.min(bancoPendente.length, prefPendente.length)
 
         for (let i = 0; i < pairsCount; i++) {
-          const valorBanco = bancoPendente[i]
-          const valorPref = prefPendente[i]
-          const diff = valorBanco - valorPref
+          const dadoBanco = bancoPendente[i]
+          const dadoPref = prefPendente[i]
+          const diff = dadoBanco.valor - dadoPref.valor
 
           items.push({
             matricula,
-            valorBanco,
-            valorPrefeitura: valorPref,
+            valorBanco: dadoBanco.valor,
+            valorPrefeitura: dadoPref.valor,
             status: 'divergente',
             obs: `Diferença: R$ ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}`,
+            nome: dadoPref.nome,
+            cpf: dadoPref.cpf,
           })
           divergenteCount++
         }
@@ -117,21 +126,23 @@ export class Reconciler {
       }
 
       // Fase 3: Sobras finais do banco
-      for (const valor of bancoPendente) {
+      for (const dado of bancoPendente) {
         items.push({
           matricula,
-          valorBanco: valor,
+          valorBanco: dado.valor,
           status: 'so_no_banco',
         })
         soNoBancoCount++
       }
 
       // Fase 4: Sobras finais da prefeitura
-      for (const valor of prefPendente) {
+      for (const dado of prefPendente) {
         items.push({
           matricula,
-          valorPrefeitura: valor,
+          valorPrefeitura: dado.valor,
           status: 'so_na_prefeitura',
+          nome: dado.nome,
+          cpf: dado.cpf,
         })
         soNaPrefeituraCount++
       }
@@ -189,14 +200,18 @@ export class Reconciler {
   }
 
   /**
-   * Agrupa rows por matrícula, extraindo apenas os valores
+   * Agrupa rows por matrícula, mantendo valor e metadados
    */
-  private groupByMatricula(rows: NormalizedRow[]): Map<string, Money[]> {
-    const map = new Map<string, Money[]>()
+  private groupByMatricula(rows: NormalizedRow[]): Map<string, RowData[]> {
+    const map = new Map<string, RowData[]>()
 
     for (const row of rows) {
       const existing = map.get(row.matricula) || []
-      existing.push(row.valor)
+      existing.push({
+        valor: row.valor,
+        nome: row.meta?.nome,
+        cpf: row.meta?.cpf,
+      })
       map.set(row.matricula, existing)
     }
 

@@ -63,11 +63,13 @@ export function ResultScreen({
       filtered = filtered.filter((item) => item.status === activeTab)
     }
 
-    // Filtrar por busca
+    // Filtrar por busca (matrícula, nome ou CPF)
     if (query.trim()) {
       const q = query.toLowerCase()
       filtered = filtered.filter((item) =>
-        item.matricula.toLowerCase().includes(q)
+        item.matricula.toLowerCase().includes(q) ||
+        (item.nome && item.nome.toLowerCase().includes(q)) ||
+        (item.cpf && item.cpf.includes(q))
       )
     }
 

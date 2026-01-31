@@ -28,6 +28,10 @@ export interface RowMeta {
   evento?: string
   /** Confiança na extração do dado */
   confidence?: ConfidenceLevel
+  /** Nome do trabalhador (quando disponível) */
+  nome?: string
+  /** CPF do trabalhador (quando disponível) */
+  cpf?: string
 }
 
 /** Referência ao dado bruto original (para debug/auditoria) */
@@ -99,6 +103,10 @@ export interface ReconciliationItem {
   status: ReconciliationStatus
   /** Observação (motivo da divergência, etc) */
   obs?: string
+  /** Nome do trabalhador (da prefeitura, quando disponível) */
+  nome?: string
+  /** CPF do trabalhador (da prefeitura, quando disponível) */
+  cpf?: string
 }
 
 /** Qualidade da extração */

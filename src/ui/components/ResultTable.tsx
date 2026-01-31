@@ -49,6 +49,8 @@ export function ResultTable({ items }: ResultTableProps) {
           <tr>
             <th>Status</th>
             <th>Matrícula</th>
+            <th>Nome</th>
+            <th>CPF</th>
             <th>Banco (R$)</th>
             <th>Prefeitura (R$)</th>
             <th>Observação</th>
@@ -59,6 +61,8 @@ export function ResultTable({ items }: ResultTableProps) {
             <tr key={`${item.matricula}-${index}`}>
               <td>{getStatusBadge(item.status)}</td>
               <td className="result-table-mono">{item.matricula}</td>
+              <td className="result-table-name">{item.nome || '—'}</td>
+              <td className="result-table-cpf">{item.cpf || '—'}</td>
               <td className="result-table-money">{formatMoney(item.valorBanco)}</td>
               <td className="result-table-money">{formatMoney(item.valorPrefeitura)}</td>
               <td className="result-table-obs">{item.obs || '—'}</td>
@@ -113,6 +117,19 @@ const tableCSS = `
     font-family: ${tokens.typography.fontFamilyMono};
     font-size: ${tokens.typography.fontSize.xs};
     text-align: right;
+    white-space: nowrap;
+  }
+
+  .result-table-name {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .result-table-cpf {
+    font-family: ${tokens.typography.fontFamilyMono};
+    font-size: ${tokens.typography.fontSize.xs};
     white-space: nowrap;
   }
 

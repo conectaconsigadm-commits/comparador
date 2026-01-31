@@ -125,6 +125,8 @@ export class ExcelExporter {
     sheet.columns = [
       { header: 'Status', key: 'status', width: 18 },
       { header: 'Matrícula', key: 'matricula', width: 12 },
+      { header: 'Nome', key: 'nome', width: 35 },
+      { header: 'CPF', key: 'cpf', width: 16 },
       { header: 'Banco (R$)', key: 'banco', width: 15 },
       { header: 'Prefeitura (R$)', key: 'prefeitura', width: 15 },
       { header: 'Diferença (R$)', key: 'diferenca', width: 15 },
@@ -152,6 +154,8 @@ export class ExcelExporter {
       const row = sheet.addRow({
         status: this.formatStatus(item.status),
         matricula: item.matricula,
+        nome: item.nome || '',
+        cpf: item.cpf || '',
         banco: item.valorBanco,
         prefeitura: item.valorPrefeitura,
         diferenca: diferenca,

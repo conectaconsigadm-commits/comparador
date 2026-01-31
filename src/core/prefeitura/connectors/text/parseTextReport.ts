@@ -13,7 +13,6 @@ export interface TextReportResult {
 
 /**
  * Regex para matrícula: 1-6 dígitos, hífen, 1-3 dígitos
- * Pode estar no início da linha (após espaços) ou em qualquer posição
  */
 const MATRICULA_REGEX_START = /^\s*(\d{1,6}-\d{1,3})\b/
 const MATRICULA_REGEX_ANYWHERE = /\b(\d{1,6}-\d{1,3})\b/
@@ -37,7 +36,7 @@ const COMPETENCIA_REGEX_COMPACT = /\b(0[1-9]|1[0-2])(\d{4})\b/
 /**
  * Regex para CPF: XXX.XXX.XXX-XX
  */
-const CPF_REGEX = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/
+const CPF_REGEX = /(\d{3}\.\d{3}\.\d{3}-\d{2})/
 
 /**
  * Engine comum de extração de texto para PDF/DOCX
@@ -54,7 +53,6 @@ export function parseTextReport(text: string): TextReportResult {
   }
 
   // Senão, tentar extração de PDF com colunas separadas
-  // (matrículas em uma parte, valores em outra)
   return parseColumnSeparatedFormat(text)
 }
 
@@ -91,17 +89,18 @@ function parseStandardFormat(text: string): TextReportResult {
       continue
     }
 
-    // Tentar extrair matrícula (preferencialmente no início, senão em qualquer posição)
-    let matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
+    // Tentar extrair matrícula no início da linha
+    const matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
     if (!matriculaMatch) {
-      matriculaMatch = trimmedLine.match(MATRICULA_REGEX_ANYWHERE)
-    }
-    if (!matriculaMatch) {
-      continue // Não é linha de dados
+      // Tentar em qualquer posição (fallback)
+      const anywhereMatch = trimmedLine.match(MATRICULA_REGEX_ANYWHERE)
+      if (!anywhereMatch) {
+        continue // Não é linha de dados
+      }
     }
 
+    const matricula = matriculaMatch ? matriculaMatch[1] : trimmedLine.match(MATRICULA_REGEX_ANYWHERE)![1]
     dataLinesDetected++
-    const matricula = matriculaMatch[1]
 
     // Extrair todos os valores monetários da linha
     const valoresMatches = trimmedLine.match(VALOR_BR_REGEX) || []
@@ -117,6 +116,9 @@ function parseStandardFormat(text: string): TextReportResult {
       continue
     }
 
+    // Extrair nome e CPF se disponíveis
+    const { nome, cpf } = extractNomeCpf(trimmedLine)
+
     extractedRows++
 
     rows.push({
@@ -127,6 +129,8 @@ function parseStandardFormat(text: string): TextReportResult {
         competencia: competenciaFound,
         evento: eventoAtual,
         confidence: valores.length === 1 ? 'high' : 'medium',
+        nome,
+        cpf,
       },
       rawRef: {
         raw: trimmedLine.slice(0, 300),
@@ -149,6 +153,9 @@ function parseStandardFormat(text: string): TextReportResult {
  * Extração de PDF com colunas separadas
  * Em alguns PDFs, as matrículas estão em uma coluna e os valores em outra
  * O pdfjs extrai primeiro todas as matrículas, depois todos os valores
+ * 
+ * Estratégia: processar por "blocos de página"
+ * Cada bloco começa após "Matrícula" ou "Evento:" e alterna entre matrículas e dados
  */
 function parseColumnSeparatedFormat(text: string): TextReportResult {
   const diagnostics: DiagnosticsItem[] = []
@@ -159,10 +166,9 @@ function parseColumnSeparatedFormat(text: string): TextReportResult {
   let eventoAtual: string | undefined
   let eventosDetectados = 0
 
-  // Coletar matrículas (linhas que começam com matrícula e não têm CPF)
-  const matriculas: string[] = []
-  // Coletar valores (linhas que têm CPF + valores monetários)
-  const valoresData: { valor: number; raw: string; evento?: string }[] = []
+  // Coletar todas as matrículas e todos os dados com valores
+  const allMatriculas: string[] = []
+  const allDadosComValor: { nome?: string; cpf?: string; valor: number; evento?: string; raw: string }[] = []
 
   for (const line of lines) {
     const trimmedLine = line.trim()
@@ -181,18 +187,31 @@ function parseColumnSeparatedFormat(text: string): TextReportResult {
       continue
     }
 
-    // Linha com matrícula no início (sem CPF) = linha de matrícula
-    const matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
-    const hasCPF = CPF_REGEX.test(trimmedLine)
-
-    if (matriculaMatch && !hasCPF) {
-      // Linha de matrícula pura (ex: "9-1 1/0")
-      matriculas.push(matriculaMatch[1])
+    // Ignorar linhas de cabeçalho
+    if (isHeaderLine(trimmedLine)) {
       continue
     }
 
-    // Linha com CPF e valores = linha de dados
-    if (hasCPF) {
+    // Verificar se é linha de matrícula pura (matrícula no início, sem CPF, sem nome longo)
+    const matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
+    const cpfMatch = trimmedLine.match(CPF_REGEX)
+
+    if (matriculaMatch && !cpfMatch) {
+      // Linha de matrícula pura se:
+      // - Começa com matrícula
+      // - Não tem CPF
+      // - É curta (menos de 50 caracteres) ou só tem números após a matrícula
+      const resto = trimmedLine.slice(matriculaMatch[0].length).trim()
+      const isShortOrNumeric = trimmedLine.length < 50 || /^[\d\/\s\.]+$/.test(resto)
+      
+      if (isShortOrNumeric) {
+        allMatriculas.push(matriculaMatch[1])
+        continue
+      }
+    }
+
+    // Linha com CPF = linha de dados
+    if (cpfMatch) {
       const valoresMatches = trimmedLine.match(VALOR_BR_REGEX) || []
       const valores = valoresMatches
         .map((v) => parseBRL(v))
@@ -200,54 +219,60 @@ function parseColumnSeparatedFormat(text: string): TextReportResult {
 
       const valor = chooseValue(valores)
       if (valor !== null) {
-        valoresData.push({
+        const { nome, cpf } = extractNomeCpf(trimmedLine)
+        allDadosComValor.push({
+          nome,
+          cpf,
           valor,
-          raw: trimmedLine.slice(0, 300),
           evento: eventoAtual,
+          raw: trimmedLine.slice(0, 300),
         })
       }
     }
   }
 
-  // Correlacionar matrículas com valores por ordem
-  const minLen = Math.min(matriculas.length, valoresData.length)
+  // Correlacionar matrículas com dados por ordem
+  const minLen = Math.min(allMatriculas.length, allDadosComValor.length)
+  
   for (let i = 0; i < minLen; i++) {
+    const dado = allDadosComValor[i]
     rows.push({
       source: 'prefeitura',
-      matricula: matriculas[i],
-      valor: valoresData[i].valor,
+      matricula: allMatriculas[i],
+      valor: dado.valor,
       meta: {
         competencia: competenciaFound,
-        evento: valoresData[i].evento,
-        confidence: 'medium', // Confiança média porque é correlação por ordem
+        evento: dado.evento,
+        confidence: 'medium',
+        nome: dado.nome,
+        cpf: dado.cpf,
       },
       rawRef: {
-        raw: valoresData[i].raw,
+        raw: dado.raw,
       },
     })
   }
 
-  // Se não encontrou nada, ainda reportar como falha
+  // Diagnósticos
   if (rows.length === 0) {
     diagnostics.push({
       severity: 'error',
       code: 'TEXT_ZERO_ROWS',
       message: 'Nenhuma linha com matrícula e valor foi extraída',
       details: {
-        matriculasFound: matriculas.length,
-        valoresFound: valoresData.length,
+        matriculasFound: allMatriculas.length,
+        dadosComValorFound: allDadosComValor.length,
       },
     })
   } else {
-    // Aviso se houver discrepância entre matrículas e valores
-    if (matriculas.length !== valoresData.length) {
+    if (allMatriculas.length !== allDadosComValor.length) {
       diagnostics.push({
         severity: 'warn',
         code: 'TEXT_COLUMN_MISMATCH',
-        message: `Número de matrículas (${matriculas.length}) diferente de valores (${valoresData.length})`,
+        message: `Número de matrículas (${allMatriculas.length}) diferente de valores (${allDadosComValor.length})`,
         details: {
-          matriculasFound: matriculas.length,
-          valoresFound: valoresData.length,
+          matriculasFound: allMatriculas.length,
+          dadosComValorFound: allDadosComValor.length,
           matched: rows.length,
         },
       })
@@ -259,8 +284,8 @@ function parseColumnSeparatedFormat(text: string): TextReportResult {
       message: `Extraídas ${rows.length} linhas (formato colunas separadas)`,
       details: {
         totalLines: lines.length,
-        matriculasFound: matriculas.length,
-        valoresFound: valoresData.length,
+        matriculasFound: allMatriculas.length,
+        dadosComValorFound: allDadosComValor.length,
         extractedRows: rows.length,
         competenciaFound,
         eventosDetectados,
@@ -291,6 +316,52 @@ function parseColumnSeparatedFormat(text: string): TextReportResult {
     competencia: competenciaFound,
     eventosDetectados,
   }
+}
+
+/**
+ * Verifica se é uma linha de cabeçalho (não é dado)
+ */
+function isHeaderLine(line: string): boolean {
+  const headerPatterns = [
+    /^Matrícula$/i,
+    /^Nome do Trabalhador/i,
+    /^Relação de Trabalhadores/i,
+    /^PREFEITURA MUNICIPAL/i,
+    /^RUA\s+\w+/i,
+    /^CNPJ:/i,
+    /^Fiorilli/i,
+    /^Mensal/i,
+    /^Folha$/i,
+    /^Página\s+\d+/i,
+    /^--\s*\d+\s+of\s+\d+\s*--$/i, // Marcador de página do PDF
+    /^Total:/i,
+    /^Referência/i,
+    /^Qtde\./i,
+    /^Valor$/i,
+  ]
+  
+  return headerPatterns.some(pattern => pattern.test(line))
+}
+
+/**
+ * Extrai nome e CPF de uma linha
+ */
+function extractNomeCpf(line: string): { nome?: string; cpf?: string } {
+  const cpfMatch = line.match(CPF_REGEX)
+  const cpf = cpfMatch ? cpfMatch[1] : undefined
+
+  // Nome: texto antes do CPF (se existir)
+  let nome: string | undefined
+  if (cpfMatch && cpfMatch.index !== undefined) {
+    const beforeCpf = line.slice(0, cpfMatch.index).trim()
+    // Remover matrícula do início se existir
+    const withoutMatricula = beforeCpf.replace(/^\d{1,6}-\d{1,3}\s*/, '').trim()
+    if (withoutMatricula.length > 2) {
+      nome = withoutMatricula
+    }
+  }
+
+  return { nome, cpf }
 }
 
 /**

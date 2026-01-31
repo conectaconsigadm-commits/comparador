@@ -50,6 +50,12 @@ export function MobileResultList({ items }: MobileResultListProps) {
             {getStatusBadge(item.status)}
             <span className="mobile-result-matricula">{item.matricula}</span>
           </div>
+          {(item.nome || item.cpf) && (
+            <div className="mobile-result-info">
+              {item.nome && <span className="mobile-result-name">{item.nome}</span>}
+              {item.cpf && <span className="mobile-result-cpf">{item.cpf}</span>}
+            </div>
+          )}
           <div className="mobile-result-values">
             <div className="mobile-result-value">
               <span className="mobile-result-label">Banco</span>
@@ -99,6 +105,29 @@ const mobileListCSS = `
     font-size: ${tokens.typography.fontSize.sm};
     font-weight: ${tokens.typography.fontWeight.medium};
     color: ${tokens.colors.textPrimary};
+  }
+
+  .mobile-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: ${tokens.spacing.sm};
+    padding-bottom: ${tokens.spacing.xs};
+    border-bottom: 1px solid ${tokens.colors.surfaceBorder};
+  }
+
+  .mobile-result-name {
+    font-size: ${tokens.typography.fontSize.sm};
+    color: ${tokens.colors.textPrimary};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-result-cpf {
+    font-family: ${tokens.typography.fontFamilyMono};
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.textSecondary};
   }
 
   .mobile-result-values {
