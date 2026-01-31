@@ -64,16 +64,15 @@ export async function extractFromPdf(file: File): Promise<PdfExtractionResult> {
       })
     }
 
-    // Extrair texto de todas as páginas
+    // Extrair texto de todas as páginas preservando quebras de linha
     let fullText = ''
     for (let i = 1; i <= totalPages; i++) {
       const page = await pdf.getPage(i)
       const textContent = await page.getTextContent()
-      const pageText = textContent.items
-        .filter((item): item is TextItem => 'str' in item)
-        .map((item) => item.str)
-        .join(' ')
-      fullText += pageText + '\n'
+      
+      // Extrair texto preservando quebras de linha baseado na posição Y
+      const pageText = extractTextWithLineBreaks(textContent.items)
+      fullText += pageText + '\n\n'
     }
 
     // Processar texto
@@ -113,6 +112,50 @@ export async function extractFromPdf(file: File): Promise<PdfExtractionResult> {
       extracao: 'falhou',
     }
   }
+}
+
+/**
+ * Extrai texto de itens do PDF preservando quebras de linha
+ * Detecta nova linha quando a posição Y muda significativamente
+ */
+function extractTextWithLineBreaks(items: (TextItem | { type: string })[]): string {
+  const textItems = items.filter((item): item is TextItem => 'str' in item)
+  
+  if (textItems.length === 0) return ''
+  
+  const lines: string[] = []
+  let currentLine = ''
+  let lastY: number | null = null
+  
+  for (const item of textItems) {
+    // transform[5] é a posição Y (transform é [scaleX, skewX, skewY, scaleY, translateX, translateY])
+    const y = item.transform ? item.transform[5] : null
+    
+    // Se Y mudou significativamente (mais de 5 unidades), é uma nova linha
+    if (lastY !== null && y !== null && Math.abs(y - lastY) > 5) {
+      if (currentLine.trim()) {
+        lines.push(currentLine.trim())
+      }
+      currentLine = item.str
+    } else {
+      // Mesma linha - adicionar com espaço se necessário
+      if (currentLine && !currentLine.endsWith(' ') && !item.str.startsWith(' ')) {
+        currentLine += ' '
+      }
+      currentLine += item.str
+    }
+    
+    if (y !== null) {
+      lastY = y
+    }
+  }
+  
+  // Adicionar última linha
+  if (currentLine.trim()) {
+    lines.push(currentLine.trim())
+  }
+  
+  return lines.join('\n')
 }
 
 /**
