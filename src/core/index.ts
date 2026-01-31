@@ -47,3 +47,7 @@ export { parseBRL } from './prefeitura/parseBRL'
 
 // Reconciler
 export { Reconciler } from './reconcile/Reconciler'
+
+// Excel export
+export { ExcelExporter } from './export/ExcelExporter'
+export { downloadBlob } from './export/download'
