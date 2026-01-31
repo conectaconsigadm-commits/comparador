@@ -35,11 +35,33 @@ const COMPETENCIA_REGEX_SLASH = /\b(\d{2})\/(\d{4})\b/
 const COMPETENCIA_REGEX_COMPACT = /\b(0[1-9]|1[0-2])(\d{4})\b/
 
 /**
+ * Regex para CPF: XXX.XXX.XXX-XX
+ */
+const CPF_REGEX = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/
+
+/**
  * Engine comum de extração de texto para PDF/DOCX
  * Entrada: texto bruto
  * Saída: rows normalizadas + diagnósticos
  */
 export function parseTextReport(text: string): TextReportResult {
+  // Primeiro, tentar extração padrão (matrícula + valor na mesma linha)
+  const standardResult = parseStandardFormat(text)
+
+  // Se extraiu linhas suficientes, usar resultado padrão
+  if (standardResult.rows.length > 0) {
+    return standardResult
+  }
+
+  // Senão, tentar extração de PDF com colunas separadas
+  // (matrículas em uma parte, valores em outra)
+  return parseColumnSeparatedFormat(text)
+}
+
+/**
+ * Extração padrão: matrícula e valor na mesma linha
+ */
+function parseStandardFormat(text: string): TextReportResult {
   const diagnostics: DiagnosticsItem[] = []
   const rows: NormalizedRow[] = []
 
@@ -50,7 +72,6 @@ export function parseTextReport(text: string): TextReportResult {
 
   let dataLinesDetected = 0
   let extractedRows = 0
-  let discardedNoMatricula = 0
   let discardedNoValue = 0
 
   for (const line of lines) {
@@ -59,15 +80,7 @@ export function parseTextReport(text: string): TextReportResult {
 
     // Detectar competência (primeira ocorrência)
     if (!competenciaFound) {
-      const matchSlash = trimmedLine.match(COMPETENCIA_REGEX_SLASH)
-      if (matchSlash) {
-        competenciaFound = `${matchSlash[1]}/${matchSlash[2]}`
-      } else {
-        const matchCompact = trimmedLine.match(COMPETENCIA_REGEX_COMPACT)
-        if (matchCompact) {
-          competenciaFound = `${matchCompact[1]}/${matchCompact[2]}`
-        }
-      }
+      competenciaFound = detectCompetencia(trimmedLine)
     }
 
     // Detectar evento atual
@@ -122,6 +135,191 @@ export function parseTextReport(text: string): TextReportResult {
   }
 
   // Diagnósticos
+  addDiagnostics(diagnostics, competenciaFound, eventosDetectados, extractedRows, dataLinesDetected, discardedNoValue, lines.length)
+
+  return {
+    rows,
+    diagnostics,
+    competencia: competenciaFound,
+    eventosDetectados,
+  }
+}
+
+/**
+ * Extração de PDF com colunas separadas
+ * Em alguns PDFs, as matrículas estão em uma coluna e os valores em outra
+ * O pdfjs extrai primeiro todas as matrículas, depois todos os valores
+ */
+function parseColumnSeparatedFormat(text: string): TextReportResult {
+  const diagnostics: DiagnosticsItem[] = []
+  const rows: NormalizedRow[] = []
+
+  const lines = text.split(/\r?\n/)
+  let competenciaFound: string | undefined
+  let eventoAtual: string | undefined
+  let eventosDetectados = 0
+
+  // Coletar matrículas (linhas que começam com matrícula e não têm CPF)
+  const matriculas: string[] = []
+  // Coletar valores (linhas que têm CPF + valores monetários)
+  const valoresData: { valor: number; raw: string; evento?: string }[] = []
+
+  for (const line of lines) {
+    const trimmedLine = line.trim()
+    if (!trimmedLine) continue
+
+    // Detectar competência
+    if (!competenciaFound) {
+      competenciaFound = detectCompetencia(trimmedLine)
+    }
+
+    // Detectar evento
+    const eventoMatch = trimmedLine.match(EVENTO_REGEX)
+    if (eventoMatch) {
+      eventoAtual = eventoMatch[1].padStart(3, '0')
+      eventosDetectados++
+      continue
+    }
+
+    // Linha com matrícula no início (sem CPF) = linha de matrícula
+    const matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
+    const hasCPF = CPF_REGEX.test(trimmedLine)
+
+    if (matriculaMatch && !hasCPF) {
+      // Linha de matrícula pura (ex: "9-1 1/0")
+      matriculas.push(matriculaMatch[1])
+      continue
+    }
+
+    // Linha com CPF e valores = linha de dados
+    if (hasCPF) {
+      const valoresMatches = trimmedLine.match(VALOR_BR_REGEX) || []
+      const valores = valoresMatches
+        .map((v) => parseBRL(v))
+        .filter((v): v is number => v !== null)
+
+      const valor = chooseValue(valores)
+      if (valor !== null) {
+        valoresData.push({
+          valor,
+          raw: trimmedLine.slice(0, 300),
+          evento: eventoAtual,
+        })
+      }
+    }
+  }
+
+  // Correlacionar matrículas com valores por ordem
+  const minLen = Math.min(matriculas.length, valoresData.length)
+  for (let i = 0; i < minLen; i++) {
+    rows.push({
+      source: 'prefeitura',
+      matricula: matriculas[i],
+      valor: valoresData[i].valor,
+      meta: {
+        competencia: competenciaFound,
+        evento: valoresData[i].evento,
+        confidence: 'medium', // Confiança média porque é correlação por ordem
+      },
+      rawRef: {
+        raw: valoresData[i].raw,
+      },
+    })
+  }
+
+  // Se não encontrou nada, ainda reportar como falha
+  if (rows.length === 0) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'TEXT_ZERO_ROWS',
+      message: 'Nenhuma linha com matrícula e valor foi extraída',
+      details: {
+        matriculasFound: matriculas.length,
+        valoresFound: valoresData.length,
+      },
+    })
+  } else {
+    // Aviso se houver discrepância entre matrículas e valores
+    if (matriculas.length !== valoresData.length) {
+      diagnostics.push({
+        severity: 'warn',
+        code: 'TEXT_COLUMN_MISMATCH',
+        message: `Número de matrículas (${matriculas.length}) diferente de valores (${valoresData.length})`,
+        details: {
+          matriculasFound: matriculas.length,
+          valoresFound: valoresData.length,
+          matched: rows.length,
+        },
+      })
+    }
+
+    diagnostics.push({
+      severity: 'info',
+      code: 'TEXT_PARSE_SUMMARY',
+      message: `Extraídas ${rows.length} linhas (formato colunas separadas)`,
+      details: {
+        totalLines: lines.length,
+        matriculasFound: matriculas.length,
+        valoresFound: valoresData.length,
+        extractedRows: rows.length,
+        competenciaFound,
+        eventosDetectados,
+        extractionMethod: 'column_separated',
+      },
+    })
+  }
+
+  if (!competenciaFound) {
+    diagnostics.push({
+      severity: 'warn',
+      code: 'TEXT_COMPETENCIA_NOT_FOUND',
+      message: 'Competência não detectada no texto',
+    })
+  }
+
+  if (eventosDetectados === 0 && rows.length > 0) {
+    diagnostics.push({
+      severity: 'warn',
+      code: 'TEXT_EVENT_NOT_FOUND',
+      message: 'Nenhum evento detectado no texto',
+    })
+  }
+
+  return {
+    rows,
+    diagnostics,
+    competencia: competenciaFound,
+    eventosDetectados,
+  }
+}
+
+/**
+ * Detecta competência em uma linha
+ */
+function detectCompetencia(line: string): string | undefined {
+  const matchSlash = line.match(COMPETENCIA_REGEX_SLASH)
+  if (matchSlash) {
+    return `${matchSlash[1]}/${matchSlash[2]}`
+  }
+  const matchCompact = line.match(COMPETENCIA_REGEX_COMPACT)
+  if (matchCompact) {
+    return `${matchCompact[1]}/${matchCompact[2]}`
+  }
+  return undefined
+}
+
+/**
+ * Adiciona diagnósticos padrão
+ */
+function addDiagnostics(
+  diagnostics: DiagnosticsItem[],
+  competenciaFound: string | undefined,
+  eventosDetectados: number,
+  extractedRows: number,
+  dataLinesDetected: number,
+  discardedNoValue: number,
+  totalLines: number
+): void {
   if (!competenciaFound) {
     diagnostics.push({
       severity: 'warn',
@@ -143,7 +341,7 @@ export function parseTextReport(text: string): TextReportResult {
       severity: 'error',
       code: 'TEXT_ZERO_ROWS',
       message: 'Nenhuma linha com matrícula e valor foi extraída',
-      details: { dataLinesDetected, discardedNoMatricula, discardedNoValue },
+      details: { dataLinesDetected, discardedNoValue },
     })
   } else {
     diagnostics.push({
@@ -151,7 +349,7 @@ export function parseTextReport(text: string): TextReportResult {
       code: 'TEXT_PARSE_SUMMARY',
       message: `Extraídas ${extractedRows} linhas de ${dataLinesDetected} detectadas`,
       details: {
-        totalLines: lines.length,
+        totalLines,
         dataLinesDetected,
         extractedRows,
         discardedNoValue,
@@ -159,13 +357,6 @@ export function parseTextReport(text: string): TextReportResult {
         eventosDetectados,
       },
     })
-  }
-
-  return {
-    rows,
-    diagnostics,
-    competencia: competenciaFound,
-    eventosDetectados,
   }
 }
 
