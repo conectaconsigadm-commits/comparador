@@ -13,29 +13,29 @@ export function AppShell({ children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div style={styles.wrapper}>
+    <div className="app-shell">
       {/* Topbar */}
-      <header style={styles.topbar}>
-        <div style={styles.topbarInner}>
+      <header className="app-topbar">
+        <div className="app-topbar-inner">
           {/* Logo */}
-          <div style={styles.logo}>
+          <div className="app-logo">
             <LogoIcon />
-            <span style={styles.logoText}>Conecta Consig</span>
+            <span className="app-logo-text">Conecta Consig</span>
           </div>
 
           {/* Desktop nav */}
-          <nav style={styles.desktopNav}>
-            <a href="#ajuda" style={styles.navLink}>
+          <nav className="app-nav-desktop">
+            <a href="#ajuda" className="app-nav-link">
               Ajuda
             </a>
-            <a href="#privacidade" style={styles.navLink}>
+            <a href="#privacidade" className="app-nav-link">
               Privacidade
             </a>
           </nav>
 
           {/* Mobile menu button */}
           <button
-            style={styles.menuButton}
+            className="app-menu-btn"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
           >
@@ -44,20 +44,22 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </header>
 
-      {/* Mobile menu (sem funcionalidade real) */}
+      {/* Mobile menu */}
       {menuOpen && (
-        <div style={styles.mobileMenu}>
-          <a href="#ajuda" style={styles.mobileNavLink}>
+        <div className="app-mobile-menu">
+          <a href="#ajuda" className="app-mobile-link">
             Ajuda
           </a>
-          <a href="#privacidade" style={styles.mobileNavLink}>
+          <a href="#privacidade" className="app-mobile-link">
             Privacidade
           </a>
         </div>
       )}
 
       {/* Main content */}
-      <main style={styles.main}>{children}</main>
+      <main className="app-main">{children}</main>
+
+      <style>{appShellCSS}</style>
     </div>
   )
 }
@@ -106,108 +108,118 @@ function MenuIcon() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ESTILOS
+// CSS
 // ─────────────────────────────────────────────────────────────
 
-const styles: Record<string, React.CSSProperties> = {
-  wrapper: {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-
-  topbar: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    borderBottom: `1px solid ${tokens.colors.surfaceBorder}`,
-  },
-
-  topbarInner: {
-    maxWidth: '1120px',
-    margin: '0 auto',
-    padding: `${tokens.spacing.md} ${tokens.spacing.lg}`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  logo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.sm,
-  },
-
-  logoText: {
-    fontSize: tokens.typography.fontSize.md,
-    fontWeight: tokens.typography.fontWeight.semibold,
-    color: tokens.colors.textPrimary,
-    letterSpacing: tokens.typography.letterSpacing.tight,
-  },
-
-  desktopNav: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.lg,
-  },
-
-  navLink: {
-    fontSize: tokens.typography.fontSize.sm,
-    fontWeight: tokens.typography.fontWeight.medium,
-    color: tokens.colors.textSecondary,
-    textDecoration: 'none',
-    transition: `color ${tokens.transitions.fast}`,
-  },
-
-  menuButton: {
-    display: 'none',
-    padding: tokens.spacing.sm,
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    color: tokens.colors.textSecondary,
-  },
-
-  mobileMenu: {
-    display: 'none',
-    flexDirection: 'column',
-    padding: tokens.spacing.base,
-    backgroundColor: tokens.colors.surface,
-    borderBottom: `1px solid ${tokens.colors.surfaceBorder}`,
-  },
-
-  mobileNavLink: {
-    padding: `${tokens.spacing.md} ${tokens.spacing.base}`,
-    fontSize: tokens.typography.fontSize.base,
-    color: tokens.colors.textPrimary,
-    textDecoration: 'none',
-  },
-
-  main: {
-    flex: 1,
-    maxWidth: '1120px',
-    width: '100%',
-    margin: '0 auto',
-    padding: `${tokens.spacing.xl} ${tokens.spacing.lg}`,
-  },
-}
-
-// Injetar estilos responsivos
-if (typeof document !== 'undefined') {
-  const styleId = 'appshell-responsive'
-  if (!document.getElementById(styleId)) {
-    const styleEl = document.createElement('style')
-    styleEl.id = styleId
-    styleEl.textContent = `
-      @media (max-width: 768px) {
-        .appshell-desktop-nav { display: none !important; }
-        .appshell-menu-btn { display: flex !important; }
-        .appshell-mobile-menu { display: flex !important; }
-      }
-    `
-    document.head.appendChild(styleEl)
+const appShellCSS = `
+  .app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-}
+
+  .app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid ${tokens.colors.surfaceBorder};
+  }
+
+  .app-topbar-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: ${tokens.spacing.md} ${tokens.spacing.lg};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .app-logo {
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacing.sm};
+  }
+
+  .app-logo-text {
+    font-size: ${tokens.typography.fontSize.md};
+    font-weight: ${tokens.typography.fontWeight.semibold};
+    color: ${tokens.colors.textPrimary};
+    letter-spacing: ${tokens.typography.letterSpacing.tight};
+  }
+
+  .app-nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacing.lg};
+  }
+
+  .app-nav-link {
+    font-size: ${tokens.typography.fontSize.sm};
+    font-weight: ${tokens.typography.fontWeight.medium};
+    color: ${tokens.colors.textSecondary};
+    text-decoration: none;
+    transition: color ${tokens.transitions.fast};
+  }
+
+  .app-nav-link:hover {
+    color: ${tokens.colors.primary};
+  }
+
+  .app-menu-btn {
+    display: none;
+    padding: ${tokens.spacing.sm};
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: ${tokens.colors.textSecondary};
+  }
+
+  .app-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    padding: ${tokens.spacing.base};
+    background-color: ${tokens.colors.surface};
+    border-bottom: 1px solid ${tokens.colors.surfaceBorder};
+  }
+
+  .app-mobile-link {
+    padding: ${tokens.spacing.md} ${tokens.spacing.base};
+    font-size: ${tokens.typography.fontSize.base};
+    color: ${tokens.colors.textPrimary};
+    text-decoration: none;
+  }
+
+  .app-main {
+    flex: 1;
+    max-width: 1120px;
+    width: 100%;
+    margin: 0 auto;
+    padding: ${tokens.spacing.xl} ${tokens.spacing.lg};
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .app-topbar-inner {
+      padding: ${tokens.spacing.sm} ${tokens.spacing.base};
+    }
+
+    .app-logo-text {
+      font-size: ${tokens.typography.fontSize.sm};
+    }
+
+    .app-nav-desktop {
+      display: none;
+    }
+
+    .app-menu-btn {
+      display: flex;
+    }
+
+    .app-main {
+      padding: ${tokens.spacing.lg} ${tokens.spacing.base};
+    }
+  }
+`

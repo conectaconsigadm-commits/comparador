@@ -96,7 +96,6 @@ export function UploadScreen() {
     extractor
       .extract(prefFile)
       .then((result) => {
-        // Determinar qualidade da extração
         let extracao: 'completa' | 'parcial' | 'falhou' = 'completa'
         const hasErrors = result.diagnostics.some((d) => d.severity === 'error')
         if (result.rows.length === 0) {
@@ -105,7 +104,6 @@ export function UploadScreen() {
           extracao = 'parcial'
         }
 
-        // Formato amigável
         const formatoDisplay =
           result.formato === 'csv_report_v1'
             ? 'CSV'
@@ -173,20 +171,20 @@ export function UploadScreen() {
   // ─────────────────────────────────────────────────────────────
 
   return (
-    <div style={styles.container}>
+    <div className="upload-screen">
       {/* Header */}
-      <header style={styles.header}>
-        <h1 style={styles.title}>Validar consignados</h1>
-        <p style={styles.subtitle}>
+      <header className="upload-header">
+        <h1 className="upload-title">Validar consignados</h1>
+        <p className="upload-subtitle">
           Envie o TXT do banco e o arquivo da prefeitura. Baixe um Excel com o
           resultado.
         </p>
       </header>
 
       {/* Grid principal */}
-      <div style={styles.grid}>
+      <div className="upload-grid">
         {/* Coluna esquerda - Cards de upload */}
-        <div style={styles.leftColumn}>
+        <div className="upload-left">
           {/* Card 1: TXT do banco */}
           <FileUploadCard
             title="TXT do banco (obrigatório)"
@@ -235,16 +233,16 @@ export function UploadScreen() {
           />
 
           {/* Botão Gerar */}
-          <div style={styles.generateWrapper}>
+          <div className="upload-generate">
             <Button
               variant="primary"
               disabled={!canGenerate}
               onClick={handleGenerate}
-              style={styles.generateButton}
+              style={{ width: '100%', maxWidth: '320px', padding: '14px 24px' }}
             >
               Gerar relatório
             </Button>
-            <p style={styles.privacyNote}>
+            <p className="upload-privacy">
               <LockIcon />
               Processamento local. Nada é enviado para servidor.
             </p>
@@ -252,11 +250,11 @@ export function UploadScreen() {
         </div>
 
         {/* Coluna direita - Informações */}
-        <aside style={styles.rightColumn}>
+        <aside className="upload-right">
           {/* Como funciona */}
           <Card padding="md">
-            <h3 style={styles.infoTitle}>Como funciona</h3>
-            <ul style={styles.bulletList}>
+            <h3 className="upload-info-title">Como funciona</h3>
+            <ul className="upload-bullet-list">
               <li>O TXT do banco é a referência.</li>
               <li>O arquivo da prefeitura pode variar.</li>
               <li>O sistema compara e gera um Excel para conferência.</li>
@@ -265,8 +263,8 @@ export function UploadScreen() {
 
           {/* Você vai baixar */}
           <Card padding="md">
-            <h3 style={styles.infoTitle}>Você vai baixar</h3>
-            <ul style={styles.downloadList}>
+            <h3 className="upload-info-title">Você vai baixar</h3>
+            <ul className="upload-download-list">
               <li>
                 <CheckIcon /> Resumo
               </li>
@@ -289,11 +287,13 @@ export function UploadScreen() {
           </Card>
 
           {/* Ilustração */}
-          <div style={styles.illustration}>
+          <div className="upload-illustration">
             <IllustrationSVG />
           </div>
         </aside>
       </div>
+
+      <style>{uploadScreenCSS}</style>
     </div>
   )
 }
@@ -346,9 +346,8 @@ function IllustrationSVG() {
       height="120"
       viewBox="0 0 180 120"
       fill="none"
-      style={{ opacity: 0.7 }}
+      style={{ opacity: 0.7, maxWidth: '100%', height: 'auto' }}
     >
-      {/* Documento 1 */}
       <rect
         x="20"
         y="30"
@@ -364,7 +363,6 @@ function IllustrationSVG() {
       <rect x="28" y="58" width="32" height="3" rx="1.5" fill="#b8c0cc" />
       <rect x="28" y="66" width="20" height="3" rx="1.5" fill="#b8c0cc" />
 
-      {/* Documento 2 */}
       <rect
         x="110"
         y="30"
@@ -380,14 +378,12 @@ function IllustrationSVG() {
       <rect x="118" y="58" width="32" height="3" rx="1.5" fill="#b8c0cc" />
       <rect x="118" y="66" width="20" height="3" rx="1.5" fill="#b8c0cc" />
 
-      {/* Setas de conexão */}
       <path
         d="M75 62 L90 55 L90 47 L105 62 L90 77 L90 69 L75 62"
         fill={tokens.colors.primary}
         opacity="0.6"
       />
 
-      {/* Checkmark */}
       <circle cx="90" cy="100" r="12" fill={tokens.colors.success} opacity="0.15" />
       <path
         d="M84 100 L88 104 L96 96"
@@ -402,141 +398,159 @@ function IllustrationSVG() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ESTILOS
+// CSS
 // ─────────────────────────────────────────────────────────────
 
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    width: '100%',
-  },
-
-  header: {
-    marginBottom: tokens.spacing.xl,
-  },
-
-  title: {
-    fontSize: '1.875rem',
-    fontWeight: tokens.typography.fontWeight.bold,
-    color: tokens.colors.textPrimary,
-    letterSpacing: tokens.typography.letterSpacing.tight,
-    marginBottom: tokens.spacing.xs,
-  },
-
-  subtitle: {
-    fontSize: tokens.typography.fontSize.md,
-    color: tokens.colors.textSecondary,
-    lineHeight: tokens.typography.lineHeight.relaxed,
-    maxWidth: '480px',
-  },
-
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 300px',
-    gap: tokens.spacing.xl,
-    alignItems: 'start',
-  },
-
-  leftColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacing.lg,
-  },
-
-  rightColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacing.lg,
-    position: 'sticky',
-    top: '100px',
-  },
-
-  generateWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: tokens.spacing.md,
-    paddingTop: tokens.spacing.base,
-  },
-
-  generateButton: {
-    width: '100%',
-    maxWidth: '280px',
-    padding: '14px 24px',
-    fontSize: tokens.typography.fontSize.base,
-  },
-
-  privacyNote: {
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.textMuted,
-  },
-
-  infoTitle: {
-    fontSize: tokens.typography.fontSize.sm,
-    fontWeight: tokens.typography.fontWeight.semibold,
-    color: tokens.colors.textPrimary,
-    marginBottom: tokens.spacing.md,
-  },
-
-  bulletList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacing.sm,
-    fontSize: tokens.typography.fontSize.sm,
-    color: tokens.colors.textSecondary,
-    lineHeight: tokens.typography.lineHeight.relaxed,
-  },
-
-  downloadList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-    fontSize: tokens.typography.fontSize.sm,
-    color: tokens.colors.textSecondary,
-  },
-
-  illustration: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: tokens.spacing.lg,
-  },
-}
-
-// Injetar estilos responsivos
-if (typeof document !== 'undefined') {
-  const styleId = 'upload-screen-responsive'
-  if (!document.getElementById(styleId)) {
-    const styleEl = document.createElement('style')
-    styleEl.id = styleId
-    styleEl.textContent = `
-      @media (max-width: 900px) {
-        .upload-grid {
-          grid-template-columns: 1fr !important;
-        }
-        .upload-right-column {
-          position: static !important;
-          order: 2;
-        }
-      }
-      
-      .bullet-list li::before {
-        content: '→';
-        margin-right: 8px;
-        color: ${tokens.colors.primary};
-      }
-      
-      .download-list li {
-        display: flex;
-        align-items: center;
-      }
-    `
-    document.head.appendChild(styleEl)
+const uploadScreenCSS = `
+  .upload-screen {
+    width: 100%;
   }
-}
+
+  .upload-header {
+    margin-bottom: ${tokens.spacing.xl};
+  }
+
+  .upload-title {
+    font-size: 1.875rem;
+    font-weight: ${tokens.typography.fontWeight.bold};
+    color: ${tokens.colors.textPrimary};
+    letter-spacing: ${tokens.typography.letterSpacing.tight};
+    margin-bottom: ${tokens.spacing.xs};
+  }
+
+  .upload-subtitle {
+    font-size: ${tokens.typography.fontSize.md};
+    color: ${tokens.colors.textSecondary};
+    line-height: ${tokens.typography.lineHeight.relaxed};
+    max-width: 480px;
+  }
+
+  .upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: ${tokens.spacing.xl};
+    align-items: start;
+  }
+
+  .upload-left {
+    display: flex;
+    flex-direction: column;
+    gap: ${tokens.spacing.lg};
+  }
+
+  .upload-right {
+    display: flex;
+    flex-direction: column;
+    gap: ${tokens.spacing.lg};
+  }
+
+  .upload-generate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${tokens.spacing.md};
+    padding-top: ${tokens.spacing.base};
+  }
+
+  .upload-privacy {
+    display: flex;
+    align-items: center;
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.textMuted};
+    text-align: center;
+  }
+
+  .upload-info-title {
+    font-size: ${tokens.typography.fontSize.sm};
+    font-weight: ${tokens.typography.fontWeight.semibold};
+    color: ${tokens.colors.textPrimary};
+    margin-bottom: ${tokens.spacing.md};
+  }
+
+  .upload-bullet-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: ${tokens.spacing.sm};
+    font-size: ${tokens.typography.fontSize.sm};
+    color: ${tokens.colors.textSecondary};
+    line-height: ${tokens.typography.lineHeight.relaxed};
+  }
+
+  .upload-bullet-list li::before {
+    content: '→';
+    margin-right: 8px;
+    color: ${tokens.colors.primary};
+  }
+
+  .upload-download-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: ${tokens.typography.fontSize.sm};
+    color: ${tokens.colors.textSecondary};
+  }
+
+  .upload-download-list li {
+    display: flex;
+    align-items: center;
+  }
+
+  .upload-illustration {
+    display: flex;
+    justify-content: center;
+    padding: ${tokens.spacing.lg};
+  }
+
+  /* Tablet */
+  @media (max-width: 900px) {
+    .upload-grid {
+      grid-template-columns: 1fr;
+      gap: ${tokens.spacing.lg};
+    }
+
+    .upload-right {
+      order: 2;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .upload-header {
+      margin-bottom: ${tokens.spacing.lg};
+    }
+
+    .upload-title {
+      font-size: 1.5rem;
+    }
+
+    .upload-subtitle {
+      font-size: ${tokens.typography.fontSize.sm};
+    }
+
+    .upload-grid {
+      gap: ${tokens.spacing.base};
+    }
+
+    .upload-left {
+      gap: ${tokens.spacing.base};
+    }
+
+    .upload-right {
+      gap: ${tokens.spacing.base};
+    }
+
+    .upload-illustration {
+      padding: ${tokens.spacing.base};
+    }
+
+    .upload-illustration svg {
+      max-width: 160px;
+    }
+  }
+`

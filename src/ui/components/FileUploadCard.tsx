@@ -10,7 +10,6 @@ interface FileUploadCardProps {
   hint?: string
   file: File | null
   onFile: (file: File | null) => void
-  // Métricas após leitura
   badge?: {
     text: string
     variant: 'success' | 'info' | 'warning' | 'error' | 'neutral'
@@ -100,15 +99,15 @@ export function FileUploadCard({
   }
 
   return (
-    <div style={styles.card}>
+    <div className="file-card">
       {/* Header */}
-      <div style={styles.header}>
-        <span style={styles.stepBadge}>{stepNumber}</span>
-        <h3 style={styles.title}>{title}</h3>
+      <div className="file-card-header">
+        <span className="file-card-step">{stepNumber}</span>
+        <h3 className="file-card-title">{title}</h3>
       </div>
 
       {/* Content */}
-      <div style={styles.content}>
+      <div className="file-card-content">
         <input
           ref={inputRef}
           type="file"
@@ -118,88 +117,72 @@ export function FileUploadCard({
         />
 
         {file ? (
-          // Arquivo selecionado
           <>
             {/* File row */}
-            <div style={styles.fileRow}>
-              <div style={styles.fileInfo}>
+            <div className="file-card-row">
+              <div className="file-card-info">
                 <FileIcon />
-                <div style={styles.fileDetails}>
-                  <span style={styles.fileName}>{file.name}</span>
-                  <span style={styles.fileSize}>{formatFileSize(file.size)}</span>
+                <div className="file-card-details">
+                  <span className="file-card-name">{file.name}</span>
+                  <span className="file-card-size">{formatFileSize(file.size)}</span>
                 </div>
               </div>
-              {badge && (
-                <Badge variant={badge.variant}>{badge.text}</Badge>
-              )}
+              {badge && <Badge variant={badge.variant}>{badge.text}</Badge>}
             </div>
 
-            {/* Loading indicator */}
+            {/* Loading */}
             {loading && (
-              <div style={styles.loadingBar}>
-                <div style={styles.loadingBarInner} />
+              <div className="file-card-loading">
+                <div className="file-card-loading-bar" />
               </div>
             )}
 
             {/* Métricas */}
             {metrics && metrics.length > 0 && (
-              <div style={styles.metrics}>
+              <div className="file-card-metrics">
                 <KeyValueList items={metrics} />
               </div>
             )}
 
             {/* Footer */}
-            <div style={styles.footer}>
-              <div style={styles.footerLeft}>
-                {formatInfo && (
-                  <span style={styles.formatInfo}>{formatInfo}</span>
-                )}
+            <div className="file-card-footer">
+              <div className="file-card-footer-left">
+                {formatInfo && <span className="file-card-format">{formatInfo}</span>}
                 {showPreviewLink && (
-                  <button style={styles.linkButton}>Ver prévia</button>
+                  <button className="file-card-link">Ver prévia</button>
                 )}
               </div>
-              <div style={styles.footerRight}>
-                <button style={styles.linkButton} onClick={handleClick}>
+              <div className="file-card-footer-right">
+                <button className="file-card-link" onClick={handleClick}>
                   Trocar
                 </button>
-                <span style={styles.separator}>|</span>
-                <button style={styles.linkButton} onClick={handleRemove}>
+                <span className="file-card-sep">|</span>
+                <button className="file-card-link" onClick={handleRemove}>
                   Remover
                 </button>
               </div>
             </div>
           </>
         ) : (
-          // Dropzone vazia
           <div
+            className={`file-card-dropzone ${isDragging ? 'dragging' : ''} ${error ? 'error' : ''}`}
             onClick={handleClick}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            style={{
-              ...styles.dropzone,
-              borderColor: error
-                ? tokens.colors.error
-                : isDragging
-                ? tokens.colors.primary
-                : 'rgba(0, 0, 0, 0.12)',
-              backgroundColor: isDragging
-                ? 'rgba(0, 102, 204, 0.02)'
-                : 'transparent',
-            }}
           >
             <UploadIcon />
-            <div style={styles.dropzoneText}>
-              <span style={styles.dropzoneTextBold}>Clique para selecionar</span>
-              {' '}ou arraste o arquivo
+            <div className="file-card-dropzone-text">
+              <strong>Clique para selecionar</strong> ou arraste o arquivo
             </div>
-            {hint && <div style={styles.dropzoneHint}>{hint}</div>}
+            {hint && <div className="file-card-dropzone-hint">{hint}</div>}
           </div>
         )}
 
-        {/* Erro */}
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <div className="file-card-error">{error}</div>}
       </div>
+
+      <style>{fileCardCSS}</style>
     </div>
   )
 }
@@ -246,200 +229,230 @@ function FileIcon() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ESTILOS
+// CSS
 // ─────────────────────────────────────────────────────────────
 
-const styles: Record<string, React.CSSProperties> = {
-  card: {
-    backgroundColor: tokens.colors.surface,
-    borderRadius: tokens.radius.lg,
-    border: `1px solid ${tokens.colors.surfaceBorder}`,
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-    overflow: 'hidden',
-  },
-
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.md,
-    padding: `${tokens.spacing.base} ${tokens.spacing.lg}`,
-    borderBottom: `1px solid ${tokens.colors.surfaceBorder}`,
-    backgroundColor: 'rgba(0, 0, 0, 0.01)',
-  },
-
-  stepBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '22px',
-    height: '22px',
-    fontSize: tokens.typography.fontSize.xs,
-    fontWeight: tokens.typography.fontWeight.semibold,
-    color: tokens.colors.primary,
-    backgroundColor: 'rgba(0, 102, 204, 0.08)',
-    borderRadius: tokens.radius.full,
-  },
-
-  title: {
-    fontSize: tokens.typography.fontSize.sm,
-    fontWeight: tokens.typography.fontWeight.medium,
-    color: tokens.colors.textPrimary,
-    margin: 0,
-  },
-
-  content: {
-    padding: tokens.spacing.lg,
-  },
-
-  dropzone: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: tokens.spacing.md,
-    padding: `${tokens.spacing.xl} ${tokens.spacing.lg}`,
-    borderRadius: tokens.radius.md,
-    border: '1.5px dashed rgba(0, 0, 0, 0.12)',
-    cursor: 'pointer',
-    transition: `all ${tokens.transitions.normal}`,
-  },
-
-  dropzoneText: {
-    fontSize: tokens.typography.fontSize.sm,
-    color: tokens.colors.textSecondary,
-    textAlign: 'center',
-  },
-
-  dropzoneTextBold: {
-    fontWeight: tokens.typography.fontWeight.medium,
-    color: tokens.colors.textPrimary,
-  },
-
-  dropzoneHint: {
-    fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.textMuted,
-  },
-
-  fileRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: tokens.spacing.base,
-    padding: tokens.spacing.md,
-    backgroundColor: 'rgba(0, 0, 0, 0.02)',
-    borderRadius: tokens.radius.md,
-    marginBottom: tokens.spacing.base,
-  },
-
-  fileInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.md,
-    minWidth: 0,
-  },
-
-  fileDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: 0,
-  },
-
-  fileName: {
-    fontSize: tokens.typography.fontSize.sm,
-    fontWeight: tokens.typography.fontWeight.medium,
-    color: tokens.colors.textPrimary,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-
-  fileSize: {
-    fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.textMuted,
-  },
-
-  loadingBar: {
-    height: '2px',
-    backgroundColor: 'rgba(0, 102, 204, 0.1)',
-    borderRadius: '1px',
-    marginBottom: tokens.spacing.base,
-    overflow: 'hidden',
-  },
-
-  loadingBarInner: {
-    width: '30%',
-    height: '100%',
-    backgroundColor: tokens.colors.primary,
-    borderRadius: '1px',
-    animation: 'loading 1.5s ease-in-out infinite',
-  },
-
-  metrics: {
-    marginBottom: tokens.spacing.base,
-  },
-
-  footer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: tokens.spacing.md,
-    borderTop: `1px solid ${tokens.colors.surfaceBorder}`,
-  },
-
-  footerLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.base,
-  },
-
-  footerRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.sm,
-  },
-
-  formatInfo: {
-    fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.textMuted,
-  },
-
-  linkButton: {
-    padding: 0,
-    fontSize: tokens.typography.fontSize.xs,
-    fontWeight: tokens.typography.fontWeight.medium,
-    color: tokens.colors.primary,
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    transition: `opacity ${tokens.transitions.fast}`,
-  },
-
-  separator: {
-    color: tokens.colors.textMuted,
-    fontSize: tokens.typography.fontSize.xs,
-  },
-
-  error: {
-    marginTop: tokens.spacing.sm,
-    fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.error,
-  },
-}
-
-// Injetar animação de loading
-if (typeof document !== 'undefined') {
-  const styleId = 'file-upload-card-styles'
-  if (!document.getElementById(styleId)) {
-    const styleEl = document.createElement('style')
-    styleEl.id = styleId
-    styleEl.textContent = `
-      @keyframes loading {
-        0% { transform: translateX(-100%); }
-        50% { transform: translateX(200%); }
-        100% { transform: translateX(-100%); }
-      }
-    `
-    document.head.appendChild(styleEl)
+const fileCardCSS = `
+  .file-card {
+    background-color: ${tokens.colors.surface};
+    border-radius: ${tokens.radius.lg};
+    border: 1px solid ${tokens.colors.surfaceBorder};
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
   }
-}
+
+  .file-card-header {
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacing.md};
+    padding: ${tokens.spacing.base} ${tokens.spacing.lg};
+    border-bottom: 1px solid ${tokens.colors.surfaceBorder};
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+
+  .file-card-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: ${tokens.typography.fontSize.xs};
+    font-weight: ${tokens.typography.fontWeight.semibold};
+    color: ${tokens.colors.primary};
+    background-color: rgba(0, 102, 204, 0.08);
+    border-radius: ${tokens.radius.full};
+    flex-shrink: 0;
+  }
+
+  .file-card-title {
+    font-size: ${tokens.typography.fontSize.sm};
+    font-weight: ${tokens.typography.fontWeight.medium};
+    color: ${tokens.colors.textPrimary};
+    margin: 0;
+  }
+
+  .file-card-content {
+    padding: ${tokens.spacing.lg};
+  }
+
+  .file-card-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: ${tokens.spacing.md};
+    padding: ${tokens.spacing.xl} ${tokens.spacing.lg};
+    border-radius: ${tokens.radius.md};
+    border: 1.5px dashed rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: all ${tokens.transitions.normal};
+    text-align: center;
+  }
+
+  .file-card-dropzone:hover {
+    border-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+
+  .file-card-dropzone.dragging {
+    border-color: ${tokens.colors.primary};
+    background-color: rgba(0, 102, 204, 0.02);
+  }
+
+  .file-card-dropzone.error {
+    border-color: ${tokens.colors.error};
+  }
+
+  .file-card-dropzone-text {
+    font-size: ${tokens.typography.fontSize.sm};
+    color: ${tokens.colors.textSecondary};
+  }
+
+  .file-card-dropzone-text strong {
+    font-weight: ${tokens.typography.fontWeight.medium};
+    color: ${tokens.colors.textPrimary};
+  }
+
+  .file-card-dropzone-hint {
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.textMuted};
+  }
+
+  .file-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${tokens.spacing.base};
+    padding: ${tokens.spacing.md};
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: ${tokens.radius.md};
+    margin-bottom: ${tokens.spacing.base};
+    flex-wrap: wrap;
+  }
+
+  .file-card-info {
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacing.md};
+    min-width: 0;
+    flex: 1;
+  }
+
+  .file-card-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .file-card-name {
+    font-size: ${tokens.typography.fontSize.sm};
+    font-weight: ${tokens.typography.fontWeight.medium};
+    color: ${tokens.colors.textPrimary};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .file-card-size {
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.textMuted};
+  }
+
+  .file-card-loading {
+    height: 2px;
+    background-color: rgba(0, 102, 204, 0.1);
+    border-radius: 1px;
+    margin-bottom: ${tokens.spacing.base};
+    overflow: hidden;
+  }
+
+  .file-card-loading-bar {
+    width: 30%;
+    height: 100%;
+    background-color: ${tokens.colors.primary};
+    border-radius: 1px;
+    animation: file-card-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes file-card-loading {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(200%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .file-card-metrics {
+    margin-bottom: ${tokens.spacing.base};
+  }
+
+  .file-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: ${tokens.spacing.sm};
+    padding-top: ${tokens.spacing.md};
+    border-top: 1px solid ${tokens.colors.surfaceBorder};
+  }
+
+  .file-card-footer-left,
+  .file-card-footer-right {
+    display: flex;
+    align-items: center;
+    gap: ${tokens.spacing.sm};
+  }
+
+  .file-card-format {
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.textMuted};
+  }
+
+  .file-card-link {
+    padding: 0;
+    font-size: ${tokens.typography.fontSize.xs};
+    font-weight: ${tokens.typography.fontWeight.medium};
+    color: ${tokens.colors.primary};
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: opacity ${tokens.transitions.fast};
+  }
+
+  .file-card-link:hover {
+    opacity: 0.7;
+  }
+
+  .file-card-sep {
+    color: ${tokens.colors.textMuted};
+    font-size: ${tokens.typography.fontSize.xs};
+  }
+
+  .file-card-error {
+    margin-top: ${tokens.spacing.sm};
+    font-size: ${tokens.typography.fontSize.xs};
+    color: ${tokens.colors.error};
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .file-card-header {
+      padding: ${tokens.spacing.md} ${tokens.spacing.base};
+    }
+
+    .file-card-content {
+      padding: ${tokens.spacing.base};
+    }
+
+    .file-card-dropzone {
+      padding: ${tokens.spacing.lg} ${tokens.spacing.base};
+    }
+
+    .file-card-name {
+      max-width: 140px;
+    }
+
+    .file-card-row {
+      padding: ${tokens.spacing.sm};
+    }
+  }
+`
