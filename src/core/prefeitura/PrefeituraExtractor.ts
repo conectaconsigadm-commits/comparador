@@ -2,6 +2,8 @@ import type { NormalizedRow, DiagnosticsItem } from '../domain/types'
 import { extractFromCsvReport } from './extractFromCsvReport'
 import { extractFromPdf } from './connectors/pdf/pdfTextReportV1'
 import { extractFromDocx } from './connectors/docx/docxTextReportV1'
+import { extractFromXlsx } from './connectors/xlsx/xlsxTableV1'
+import { extractFromXls } from './connectors/xls/xlsTableV1'
 
 /**
  * Formato detectado do arquivo da prefeitura
@@ -10,6 +12,8 @@ export type PrefeituraFormato =
   | 'csv_report_v1'
   | 'pdf_text_report_v1'
   | 'docx_text_report_v1'
+  | 'xlsx_table_v1'
+  | 'xls_table_v1'
   | 'unknown'
 
 /**
@@ -67,7 +71,17 @@ export class PrefeituraExtractor {
       return extractFromDocx(file)
     }
 
-    // Formato não suportado (XLS, XLSX, etc)
+    // XLSX: usar extrator de planilha XLSX
+    if (extension === 'xlsx') {
+      return extractFromXlsx(file)
+    }
+
+    // XLS: usar extrator de planilha XLS (formato legado)
+    if (extension === 'xls') {
+      return extractFromXls(file)
+    }
+
+    // Formato não suportado
     return {
       rows: [],
       diagnostics: [
@@ -78,7 +92,7 @@ export class PrefeituraExtractor {
           details: {
             fileName: file.name,
             extension,
-            supportedFormats: ['csv', 'pdf', 'docx'],
+            supportedFormats: ['csv', 'pdf', 'docx', 'xlsx', 'xls'],
           },
         },
       ],
