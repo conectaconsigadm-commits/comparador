@@ -44,3 +44,6 @@ export type {
 export { extractFromCsvReport } from './prefeitura/extractFromCsvReport'
 export type { CsvReportExtractionResult } from './prefeitura/extractFromCsvReport'
 export { parseBRL } from './prefeitura/parseBRL'
+
+// Reconciler
+export { Reconciler } from './reconcile/Reconciler'
