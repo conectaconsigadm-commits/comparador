@@ -1,4 +1,4 @@
-import { parseCellAsMatricula, parseCellAsMonetary } from './parseSheetValue'
+import { parseCellAsMatricula, parseCellAsMonetary, cellLooksCpf } from './parseSheetValue'
 
 /**
  * Resultado da detecção de colunas
@@ -35,6 +35,7 @@ export function detectSheetColumns(
   const valorHits: number[] = new Array(maxCols).fill(0)
   const valorSums: number[] = new Array(maxCols).fill(0)
   const eventoHits: number[] = new Array(maxCols).fill(0)
+  const cpfHits: number[] = new Array(maxCols).fill(0)
 
   for (const row of rows) {
     for (let col = 0; col < row.length; col++) {
@@ -45,7 +46,12 @@ export function detectSheetColumns(
         matriculaHits[col]++
       }
 
-      // Testar valor monetário
+      // Testar CPF (para excluir da busca de valores)
+      if (cellLooksCpf(cell)) {
+        cpfHits[col]++
+      }
+
+      // Testar valor monetário (já exclui CPFs internamente)
       const valor = parseCellAsMonetary(cell)
       if (valor !== null && valor >= 0) {
         valorHits[col]++
@@ -70,12 +76,21 @@ export function detectSheetColumns(
     return null
   }
 
-  // Encontrar colunas candidatas de valor (excluindo a coluna de matrícula)
+  // Encontrar colunas candidatas de valor (excluindo matrícula e CPF)
   // Preferir a coluna com MAIOR SOMA de valores (evita colunas de 0,00)
   valorHits[matriculaCol] = -1
   valorSums[matriculaCol] = -1
 
-  // Primeiro, encontrar todas as colunas que têm hits de valor
+  // Excluir colunas que parecem ser de CPF (mais de 50% das células são CPF)
+  const cpfThreshold = rows.length * 0.3 // Se 30%+ das células são CPF, é coluna de CPF
+  for (let col = 0; col < maxCols; col++) {
+    if (cpfHits[col] >= cpfThreshold) {
+      valorHits[col] = -1
+      valorSums[col] = -1
+    }
+  }
+
+  // Encontrar todas as colunas que têm hits de valor (após exclusões)
   const valorCandidates: { col: number; hits: number; sum: number }[] = []
   for (let col = 0; col < maxCols; col++) {
     if (valorHits[col] > 0) {

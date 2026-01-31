@@ -30,24 +30,57 @@ export function parseSheetValue(cell: unknown): CellValue {
 }
 
 /**
+ * Regex para detectar CPF (XXX.XXX.XXX-XX)
+ */
+const CPF_REGEX = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/
+
+/**
+ * Verifica se célula parece ser um CPF
+ */
+export function cellLooksCpf(cell: unknown): boolean {
+  if (cell === null || cell === undefined) {
+    return false
+  }
+  const str = String(cell).trim()
+  return CPF_REGEX.test(str)
+}
+
+/**
+ * Valor máximo razoável para consignado (R$ 50.000)
+ * Valores acima disso provavelmente são CPFs parseados errado
+ */
+const MAX_REASONABLE_VALUE = 50000
+
+/**
  * Tenta parsear célula como valor monetário
  * Aceita number ou string BR "1.234,56"
+ * Exclui valores que parecem ser CPF ou são muito grandes
  */
 export function parseCellAsMonetary(cell: unknown): number | null {
   if (cell === null || cell === undefined) {
     return null
   }
 
+  // Se parecer CPF, não é valor monetário
+  if (cellLooksCpf(cell)) {
+    return null
+  }
+
+  let value: number | null = null
+
   if (typeof cell === 'number') {
     // Se for número, assumir que já está em formato correto
-    return isFinite(cell) ? cell : null
+    value = isFinite(cell) ? cell : null
+  } else if (typeof cell === 'string') {
+    value = parseBRL(cell)
   }
 
-  if (typeof cell === 'string') {
-    return parseBRL(cell)
+  // Validar que o valor é razoável (não é CPF parseado errado)
+  if (value !== null && value > MAX_REASONABLE_VALUE) {
+    return null
   }
 
-  return null
+  return value
 }
 
 /**
