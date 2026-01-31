@@ -3,12 +3,14 @@ import { tokens } from '../styles/tokens'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { FileUploadCard } from '../components/FileUploadCard'
+import { InlineBanner } from '../components/InlineBanner'
 import { BankParser } from '../../core/bank/BankParser'
 import { PrefeituraExtractor } from '../../core/prefeitura/PrefeituraExtractor'
 import type { KeyValueItem } from '../components/KeyValueList'
+import type { BankParsedData, PrefeituraParsedData } from '../state/appState'
 
 // ─────────────────────────────────────────────────────────────
-// TIPOS DE ESTADO
+// TIPOS DE ESTADO LOCAL
 // ─────────────────────────────────────────────────────────────
 
 interface BankStats {
@@ -24,22 +26,26 @@ interface PrefStats {
   formato: string
   extracao: 'completa' | 'parcial' | 'falhou'
   diagnosticsCount: number
+  isUnknownFormat: boolean
 }
 
 interface UploadScreenProps {
-  onGenerate?: (data: {
-    bankLines: number
-    prefFormat: string
-    prefExtracted: number
-    showPartialWarning: boolean
-  }) => void
+  onGenerate?: () => void
+  onBankParsed?: (data: BankParsedData | null) => void
+  onPrefParsed?: (data: PrefeituraParsedData | null) => void
+  canGenerate?: boolean
 }
 
 /**
- * Tela 1 - Upload de arquivos (Mockup 2)
+ * Tela 1 - Upload de arquivos
  * Layout 2 colunas com leitura real dos arquivos
  */
-export function UploadScreen({ onGenerate }: UploadScreenProps) {
+export function UploadScreen({
+  onGenerate,
+  onBankParsed,
+  onPrefParsed,
+  canGenerate: canGenerateProp,
+}: UploadScreenProps) {
   // Arquivos
   const [bankFile, setBankFile] = useState<File | null>(null)
   const [prefFile, setPrefFile] = useState<File | null>(null)
@@ -52,7 +58,11 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
   const [bankLoading, setBankLoading] = useState(false)
   const [prefLoading, setPrefLoading] = useState(false)
 
-  const canGenerate = bankStats?.ok && prefStats?.extracao !== 'falhou'
+  // Usar prop se fornecida, senão calcular localmente
+  const canGenerate =
+    canGenerateProp !== undefined
+      ? canGenerateProp
+      : bankStats?.ok && prefStats?.extracao !== 'falhou' && !prefStats?.isUnknownFormat
 
   // ─────────────────────────────────────────────────────────────
   // LEITURA DO BANCO (TXT)
@@ -61,6 +71,7 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
   useEffect(() => {
     if (!bankFile) {
       setBankStats(null)
+      onBankParsed?.(null)
       return
     }
 
@@ -70,11 +81,20 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
     parser
       .parse(bankFile)
       .then((result) => {
-        setBankStats({
+        const stats: BankStats = {
           lines: result.rows.length,
           competencia: result.competencia,
           ok: result.rows.length > 0,
           diagnosticsCount: result.diagnostics.length,
+        }
+        setBankStats(stats)
+
+        // Passar dados completos para o App
+        onBankParsed?.({
+          rows: result.rows,
+          diagnostics: result.diagnostics,
+          competencia: result.competencia,
+          lines: result.rows.length,
         })
       })
       .catch(() => {
@@ -83,11 +103,12 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
           ok: false,
           diagnosticsCount: 1,
         })
+        onBankParsed?.(null)
       })
       .finally(() => {
         setBankLoading(false)
       })
-  }, [bankFile])
+  }, [bankFile, onBankParsed])
 
   // ─────────────────────────────────────────────────────────────
   // LEITURA DA PREFEITURA
@@ -96,6 +117,7 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
   useEffect(() => {
     if (!prefFile) {
       setPrefStats(null)
+      onPrefParsed?.(null)
       return
     }
 
@@ -107,7 +129,9 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
       .then((result) => {
         let extracao: 'completa' | 'parcial' | 'falhou' = 'completa'
         const hasErrors = result.diagnostics.some((d) => d.severity === 'error')
-        if (result.rows.length === 0) {
+        const isUnknownFormat = result.formato === 'unknown'
+
+        if (result.rows.length === 0 || isUnknownFormat) {
           extracao = 'falhou'
         } else if (hasErrors) {
           extracao = 'parcial'
@@ -120,12 +144,24 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
             ? 'Desconhecido'
             : result.formato
 
-        setPrefStats({
+        const stats: PrefStats = {
           extracted: result.rows.length,
           competencia: result.competencia,
           formato: formatoDisplay,
           extracao,
           diagnosticsCount: result.diagnostics.length,
+          isUnknownFormat,
+        }
+        setPrefStats(stats)
+
+        // Passar dados completos para o App
+        onPrefParsed?.({
+          rows: result.rows,
+          diagnostics: result.diagnostics,
+          competencia: result.competencia,
+          formato: result.formato,
+          extracted: result.rows.length,
+          extracao,
         })
       })
       .catch(() => {
@@ -134,12 +170,14 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
           formato: 'Erro',
           extracao: 'falhou',
           diagnosticsCount: 1,
+          isUnknownFormat: true,
         })
+        onPrefParsed?.(null)
       })
       .finally(() => {
         setPrefLoading(false)
       })
-  }, [prefFile])
+  }, [prefFile, onPrefParsed])
 
   // ─────────────────────────────────────────────────────────────
   // MÉTRICAS PARA OS CARDS
@@ -172,14 +210,7 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
   // ─────────────────────────────────────────────────────────────
 
   const handleGenerate = () => {
-    if (onGenerate && bankStats && prefStats) {
-      onGenerate({
-        bankLines: bankStats.lines,
-        prefFormat: prefStats.formato,
-        prefExtracted: prefStats.extracted,
-        showPartialWarning: prefStats.extracao === 'parcial',
-      })
-    }
+    onGenerate?.()
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -232,7 +263,9 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
             loading={prefLoading}
             badge={
               prefStats
-                ? prefStats.extracao === 'falhou'
+                ? prefStats.isUnknownFormat
+                  ? { text: 'Formato não suportado', variant: 'error' }
+                  : prefStats.extracao === 'falhou'
                   ? { text: 'Extração falhou', variant: 'error' }
                   : prefStats.extracao === 'parcial'
                   ? { text: `Formato: ${prefStats.formato}`, variant: 'warning' }
@@ -245,8 +278,16 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
                 ? `Competência: ${prefStats.competencia}`
                 : undefined
             }
-            showPreviewLink={!!prefStats}
+            showPreviewLink={!!prefStats && !prefStats.isUnknownFormat}
           />
+
+          {/* Banner de formato não suportado */}
+          {prefStats?.isUnknownFormat && (
+            <InlineBanner variant="warning" title="Formato não suportado">
+              Por enquanto aceitamos apenas CSV. Converta o arquivo para CSV e
+              tente novamente.
+            </InlineBanner>
+          )}
 
           {/* Botão Gerar */}
           <div className="upload-generate">
