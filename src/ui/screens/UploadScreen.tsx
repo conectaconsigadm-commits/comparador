@@ -26,11 +26,20 @@ interface PrefStats {
   diagnosticsCount: number
 }
 
+interface UploadScreenProps {
+  onGenerate?: (data: {
+    bankLines: number
+    prefFormat: string
+    prefExtracted: number
+    showPartialWarning: boolean
+  }) => void
+}
+
 /**
  * Tela 1 - Upload de arquivos (Mockup 2)
  * Layout 2 colunas com leitura real dos arquivos
  */
-export function UploadScreen() {
+export function UploadScreen({ onGenerate }: UploadScreenProps) {
   // Arquivos
   const [bankFile, setBankFile] = useState<File | null>(null)
   const [prefFile, setPrefFile] = useState<File | null>(null)
@@ -163,7 +172,14 @@ export function UploadScreen() {
   // ─────────────────────────────────────────────────────────────
 
   const handleGenerate = () => {
-    console.log('Gerar relatório:', { bankFile, prefFile, bankStats, prefStats })
+    if (onGenerate && bankStats && prefStats) {
+      onGenerate({
+        bankLines: bankStats.lines,
+        prefFormat: prefStats.formato,
+        prefExtracted: prefStats.extracted,
+        showPartialWarning: prefStats.extracao === 'parcial',
+      })
+    }
   }
 
   // ─────────────────────────────────────────────────────────────
