@@ -1,10 +1,16 @@
 import type { NormalizedRow, DiagnosticsItem } from '../domain/types'
 import { extractFromCsvReport } from './extractFromCsvReport'
+import { extractFromPdf } from './connectors/pdf/pdfTextReportV1'
+import { extractFromDocx } from './connectors/docx/docxTextReportV1'
 
 /**
  * Formato detectado do arquivo da prefeitura
  */
-export type PrefeituraFormato = 'csv_report_v1' | 'unknown'
+export type PrefeituraFormato =
+  | 'csv_report_v1'
+  | 'pdf_text_report_v1'
+  | 'docx_text_report_v1'
+  | 'unknown'
 
 /**
  * Resultado da extração da prefeitura
@@ -14,11 +20,12 @@ export interface PrefeituraExtractionResult {
   diagnostics: DiagnosticsItem[]
   competencia?: string
   formato: PrefeituraFormato
+  extracao?: 'completa' | 'parcial' | 'falhou'
 }
 
 /**
  * Extrator de dados da prefeitura
- * Suporta diferentes formatos de arquivo (CSV, XLS futuro)
+ * Suporta diferentes formatos de arquivo (CSV, PDF, DOCX)
  */
 export class PrefeituraExtractor {
   /**
@@ -34,13 +41,33 @@ export class PrefeituraExtractor {
       const text = await file.text()
       const result = extractFromCsvReport(text)
 
+      // Determinar extracao
+      const hasError = result.diagnostics.some((d) => d.severity === 'error')
+      const extracao: 'completa' | 'parcial' | 'falhou' =
+        result.rows.length === 0
+          ? 'falhou'
+          : hasError
+          ? 'parcial'
+          : 'completa'
+
       return {
         ...result,
         formato: 'csv_report_v1',
+        extracao,
       }
     }
 
-    // Formato não suportado
+    // PDF: usar extrator de texto PDF
+    if (extension === 'pdf') {
+      return extractFromPdf(file)
+    }
+
+    // DOCX: usar extrator de texto DOCX
+    if (extension === 'docx') {
+      return extractFromDocx(file)
+    }
+
+    // Formato não suportado (XLS, XLSX, etc)
     return {
       rows: [],
       diagnostics: [
@@ -51,12 +78,13 @@ export class PrefeituraExtractor {
           details: {
             fileName: file.name,
             extension,
-            supportedFormats: ['csv'],
+            supportedFormats: ['csv', 'pdf', 'docx'],
           },
         },
       ],
       competencia: undefined,
       formato: 'unknown',
+      extracao: 'falhou',
     }
   }
 
