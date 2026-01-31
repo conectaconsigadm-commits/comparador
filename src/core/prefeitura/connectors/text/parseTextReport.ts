@@ -13,8 +13,10 @@ export interface TextReportResult {
 
 /**
  * Regex para matrícula: 1-6 dígitos, hífen, 1-3 dígitos
+ * Pode estar no início da linha (após espaços) ou em qualquer posição
  */
-const MATRICULA_REGEX = /^(\d{1,6})-(\d{1,3})\b/
+const MATRICULA_REGEX_START = /^\s*(\d{1,6}-\d{1,3})\b/
+const MATRICULA_REGEX_ANYWHERE = /\b(\d{1,6}-\d{1,3})\b/
 
 /**
  * Regex para valores monetários BR: 1.234,56 ou 400,49
@@ -76,14 +78,17 @@ export function parseTextReport(text: string): TextReportResult {
       continue
     }
 
-    // Tentar extrair matrícula
-    const matriculaMatch = trimmedLine.match(MATRICULA_REGEX)
+    // Tentar extrair matrícula (preferencialmente no início, senão em qualquer posição)
+    let matriculaMatch = trimmedLine.match(MATRICULA_REGEX_START)
+    if (!matriculaMatch) {
+      matriculaMatch = trimmedLine.match(MATRICULA_REGEX_ANYWHERE)
+    }
     if (!matriculaMatch) {
       continue // Não é linha de dados
     }
 
     dataLinesDetected++
-    const matricula = trimmedLine.match(MATRICULA_REGEX)![0]
+    const matricula = matriculaMatch[1]
 
     // Extrair todos os valores monetários da linha
     const valoresMatches = trimmedLine.match(VALOR_BR_REGEX) || []

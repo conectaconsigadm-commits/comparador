@@ -12,6 +12,23 @@ describe('parseTextReport', () => {
       expect(result.rows[0].valor).toBe(400.49)
     })
 
+    it('deve extrair matrícula com espaços no início da linha', () => {
+      const text = '   9-1 EDIMAR FERREIRA SANTOS  0,00'
+      const result = parseTextReport(text)
+
+      expect(result.rows).toHaveLength(1)
+      expect(result.rows[0].matricula).toBe('9-1')
+      expect(result.rows[0].valor).toBe(0)
+    })
+
+    it('deve extrair matrícula em qualquer posição da linha', () => {
+      const text = 'Nome: João Matrícula 85-1 Valor 400,49'
+      const result = parseTextReport(text)
+
+      expect(result.rows).toHaveLength(1)
+      expect(result.rows[0].matricula).toBe('85-1')
+    })
+
     it('deve escolher último valor não-zero quando há múltiplos', () => {
       const text = '85-1  Consignado  0,00  400,49'
       const result = parseTextReport(text)
