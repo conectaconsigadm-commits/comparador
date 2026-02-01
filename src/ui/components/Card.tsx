@@ -33,7 +33,7 @@ export function Card({
     <div
       className={`${cardClass} ${className}`}
       style={{
-        overflow: 'hidden',
+        overflow: 'visible',
         ...style,
       }}
     >

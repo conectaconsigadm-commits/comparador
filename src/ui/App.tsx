@@ -7,6 +7,7 @@ import {
   type ProcessingDetails,
 } from './screens/ProcessingScreen'
 import { ResultScreen } from './screens/ResultScreen'
+import { ExtractionPreviewModal } from './components/ExtractionPreviewModal'
 import type { StepItem } from './components/StepList'
 import type { ReconciliationResult, DiagnosticsItem } from '../core/domain/types'
 import { Reconciler } from '../core/reconcile/Reconciler'
@@ -30,7 +31,7 @@ type Screen = 'upload' | 'processing' | 'result'
 // ─────────────────────────────────────────────────────────────
 
 const STEP_LABELS = [
-  'Lendo TXT do banco',
+  'Lendo arquivo do banco',
   'Extraindo dados da prefeitura',
   'Normalizando matrículas e valores',
   'Comparando resultados',
@@ -52,7 +53,7 @@ function getSteps(currentStep: number): StepItem[] {
 function getStepMessage(currentStep: number): string {
   switch (currentStep) {
     case 0:
-      return 'Lendo TXT do banco...'
+      return 'Lendo arquivo do banco...'
     case 1:
       return 'Extraindo dados da prefeitura...'
     case 2:
@@ -73,6 +74,9 @@ function getStepMessage(currentStep: number): string {
 function App() {
   // Tela atual
   const [screen, setScreen] = useState<Screen>('upload')
+
+  // Modal de preview
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   // Dados do upload
   const [uploadState, setUploadState] = useState<UploadState>({})
@@ -227,14 +231,29 @@ function App() {
   // HANDLERS DE NAVEGAÇÃO
   // ─────────────────────────────────────────────────────────────
 
-  const handleGenerate = useCallback(() => {
-    setPercent(0)
-    setCurrentStep(0)
-    setProcessingError(null)
-    setScreen('processing')
-    // Iniciar pipeline no próximo tick
-    setTimeout(() => runPipeline(), 100)
-  }, [runPipeline])
+  // Abre o modal de preview (primeiro passo)
+  const handleGenerateClick = useCallback(() => {
+    setShowPreviewModal(true)
+  }, [])
+
+  // Fecha o modal de preview
+  const handleClosePreview = useCallback(() => {
+    setShowPreviewModal(false)
+  }, [])
+
+  // Confirma no modal e inicia o pipeline
+  const handleConfirmPreview = useCallback(
+    (_force?: boolean) => {
+      setShowPreviewModal(false)
+      setPercent(0)
+      setCurrentStep(0)
+      setProcessingError(null)
+      setScreen('processing')
+      // Iniciar pipeline no próximo tick
+      setTimeout(() => runPipeline(), 100)
+    },
+    [runPipeline]
+  )
 
   const handleBack = useCallback(() => {
     cancelledRef.current = true
@@ -301,10 +320,10 @@ function App() {
   // ─────────────────────────────────────────────────────────────
 
   return (
-    <AppShell>
+    <AppShell onLogoClick={handleNewUpload}>
       {screen === 'upload' && (
         <UploadScreen
-          onGenerate={handleGenerate}
+          onGenerate={handleGenerateClick}
           onBankParsed={handleBankParsed}
           onPrefParsed={handlePrefParsed}
           canGenerate={!!canGenerate}
@@ -327,6 +346,15 @@ function App() {
           canDownload={!!excelBlob}
         />
       )}
+
+      {/* Modal de prévia da extração */}
+      <ExtractionPreviewModal
+        open={showPreviewModal}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmPreview}
+        bank={uploadState.bankParsed || null}
+        pref={uploadState.prefParsed || null}
+      />
     </AppShell>
   )
 }

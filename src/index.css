@@ -1,90 +1,107 @@
-/* ─────────────────────────────────────────────────────────────
-   Conecta Consig - Global Styles
-   Sistema de tema Light/Dark com visual premium
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONECTA CONSIG — GLOBAL STYLES
+   Design System "Modern Clean"
+   ═══════════════════════════════════════════════════════════════════════════
+   
+   Filosofia: Limpo • Moderno • Uniforme
+   Tipografia unificada (Sans-Serif) • Cores consistentes • Radius 12px
+   
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────
-   TEMA LIGHT (padrão)
-   ───────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────
+   TEMA LIGHT (padrão) — "Paper & Ink"
+   ─────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Background */
-  --cc-bg: #f0f4f8;
-  --cc-bg-gradient: linear-gradient(145deg, #f5f8fb 0%, #e8eef5 50%, #dfe6ef 100%);
-  --cc-bg-radial-1: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99, 179, 237, 0.12) 0%, transparent 50%);
-  --cc-bg-radial-2: radial-gradient(ellipse 60% 40% at 80% 100%, rgba(129, 140, 248, 0.08) 0%, transparent 50%);
-  --cc-bg-vignette: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.03) 100%);
+  /* ▸ Background — Papel de qualidade */
+  --cc-bg: #F4F4F0;
+  --cc-bg-muted: #ECECEA;
   
-  /* Surfaces (glass) */
-  --cc-surface: rgba(255, 255, 255, 0.75);
-  --cc-surface-solid: #ffffff;
-  --cc-surface-2: rgba(255, 255, 255, 0.5);
-  --cc-surface-elevated: rgba(255, 255, 255, 0.9);
+  /* ▸ Surfaces — Branco sólido com bordas */
+  --cc-surface: #FFFFFF;
+  --cc-surface-solid: #FFFFFF;
+  --cc-surface-elevated: #FFFFFF;
+  --cc-surface-hover: rgba(0, 0, 0, 0.04);
   
-  /* Text */
-  --cc-text: #1a202c;
-  --cc-text-secondary: #4a5568;
-  --cc-text-muted: #718096;
-  --cc-text-inverse: #ffffff;
+  /* ▸ Text — Tinta de alta qualidade */
+  --cc-text: #111111;
+  --cc-text-secondary: #3D3D3D;
+  --cc-text-tertiary: #6B6B6B;
+  --cc-text-muted: #999999;
+  --cc-text-inverse: #FFFFFF;
   
-  /* Primary (azul elegante) */
-  --cc-primary: #2563eb;
-  --cc-primary-hover: #1d4ed8;
-  --cc-primary-light: rgba(37, 99, 235, 0.1);
-  --cc-primary-glow: rgba(37, 99, 235, 0.15);
+  /* ▸ Borders — Linhas finas e precisas */
+  --cc-border: #E2E2E2;
+  --cc-border-strong: #CCCCCC;
+  --cc-border-dark: #111111;
+  --cc-border-hover: #CCCCCC;
   
-  /* Borders & Shadows */
-  --cc-border: rgba(0, 0, 0, 0.08);
-  --cc-border-strong: rgba(0, 0, 0, 0.12);
-  --cc-border-glass: rgba(255, 255, 255, 0.5);
-  --cc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --cc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-  --cc-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
-  --cc-shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --cc-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  /* ▸ Primary — Azul Link (usado com parcimônia) */
+  --cc-primary: #1A73E8;
+  --cc-primary-hover: #1557B0;
+  --cc-primary-light: rgba(26, 115, 232, 0.08);
+  --cc-primary-muted: rgba(26, 115, 232, 0.06);
   
-  /* Semantic */
-  --cc-success: #059669;
-  --cc-success-light: rgba(5, 150, 105, 0.1);
-  --cc-warning: #d97706;
-  --cc-warning-light: rgba(217, 119, 6, 0.1);
-  --cc-danger: #dc2626;
-  --cc-danger-light: rgba(220, 38, 38, 0.1);
-  --cc-info: #0891b2;
-  --cc-info-light: rgba(8, 145, 178, 0.1);
+  /* ▸ Semantic — Cores funcionais */
+  --cc-success: #137333;
+  --cc-success-light: #E6F4EA;
+  --cc-warning: #B06000;
+  --cc-warning-light: #FEF7E0;
+  --cc-error: #D93025;
+  --cc-danger: #D93025;
+  --cc-danger-light: #FCECEA;
+  --cc-info: #1967D2;
+  --cc-info-light: #E8F0FE;
   
-  /* Radius */
-  --cc-radius-sm: 8px;
-  --cc-radius-md: 12px;
-  --cc-radius-lg: 16px;
-  --cc-radius-xl: 20px;
-  --cc-radius-pill: 999px;
+  /* ▸ Shadows — Eliminadas (usar bordas) */
+  --cc-shadow-none: none;
+  --cc-shadow-focus: 0 0 0 2px rgba(26, 115, 232, 0.25);
+  --cc-shadow-dropdown: 0 2px 8px rgba(0, 0, 0, 0.12);
+  /* Legado — mantidos para compatibilidade, mas devem ser removidos */
+  --cc-shadow-sm: none;
+  --cc-shadow-md: none;
+  --cc-shadow-lg: none;
+  --cc-shadow-xl: none;
+  --cc-shadow-glass: none;
   
-  /* Spacing */
-  --cc-space-4: 4px;
-  --cc-space-8: 8px;
-  --cc-space-12: 12px;
-  --cc-space-16: 16px;
-  --cc-space-20: 20px;
-  --cc-space-24: 24px;
-  --cc-space-32: 32px;
-  --cc-space-40: 40px;
-  --cc-space-48: 48px;
+  /* ▸ Radius — Mínimo (0-2px) */
+  --cc-radius-none: 0px;
+  --cc-radius-xs: 1px;
+  --cc-radius-sm: 6px;
+  --cc-radius-md: 8px;
+  --cc-radius-lg: 12px;
+  --cc-radius-xl: 16px;
+  --cc-radius-pill: 9999px;
   
-  /* Blur */
-  --cc-blur: blur(16px) saturate(180%);
+  /* ▸ Spacing */
+  --cc-space-1: 4px;
+  --cc-space-2: 8px;
+  --cc-space-3: 12px;
+  --cc-space-4: 16px;
+  --cc-space-5: 20px;
+  --cc-space-6: 24px;
+  --cc-space-8: 32px;
+  --cc-space-10: 40px;
+  --cc-space-12: 48px;
+  --cc-space-16: 64px;
   
-  /* Typography */
-  --cc-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --cc-font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  /* ▸ Typography — Modern Clean (Sans-Serif Unificado) */
+  --cc-font-heading: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --cc-font-body: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --cc-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  /* Alias para compatibilidade */
+  --cc-font-sans: var(--cc-font-body);
   
-  /* Action Bar */
-  --cc-action-bar-bg: rgba(255, 255, 255, 0.85);
-  --action-bar-height: 72px;
-  --action-bar-reserve: 104px;
+  /* ▸ Layout */
+  --cc-max-width: 1200px;
+  --cc-topbar-height: 56px;
+  /* Action bar removido — botão agora é inline */
   
-  /* Base settings */
-  font-family: var(--cc-font-sans);
+  /* ▸ Blur — REMOVIDO */
+  --cc-blur: none;
+  
+  /* ▸ Base settings */
+  font-family: var(--cc-font-body);
   font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
@@ -98,65 +115,61 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   TEMA DARK
-   ───────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────
+   TEMA DARK — "Dark Navy Professional"
+   ─────────────────────────────────────────────────────────────────────────── */
 
 html[data-theme="dark"] {
-  /* Background */
-  --cc-bg: #0f1419;
-  --cc-bg-gradient: linear-gradient(145deg, #0f1419 0%, #1a1f2e 50%, #151b28 100%);
-  --cc-bg-radial-1: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
-  --cc-bg-radial-2: radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
-  --cc-bg-vignette: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.4) 100%);
+  /* ▸ Background — Dark Navy */
+  --cc-bg: #0B0E14;
+  --cc-bg-muted: #0F1318;
   
-  /* Surfaces (glass) */
-  --cc-surface: rgba(30, 41, 59, 0.7);
-  --cc-surface-solid: #1e293b;
-  --cc-surface-2: rgba(30, 41, 59, 0.5);
-  --cc-surface-elevated: rgba(30, 41, 59, 0.9);
+  /* ▸ Surfaces — Lighter Navy */
+  --cc-surface: #151B28;
+  --cc-surface-solid: #151B28;
+  --cc-surface-elevated: #1C2433;
+  --cc-surface-hover: rgba(255, 255, 255, 0.04);
   
-  /* Text */
-  --cc-text: #f1f5f9;
-  --cc-text-secondary: #cbd5e1;
-  --cc-text-muted: #94a3b8;
-  --cc-text-inverse: #0f172a;
+  /* ▸ Text — Branco e Cinza Claro */
+  --cc-text: #F8FAFC;
+  --cc-text-secondary: #CBD5E1;
+  --cc-text-tertiary: #94A3B8;
+  --cc-text-muted: #64748B;
+  --cc-text-inverse: #0B0E14;
   
-  /* Primary */
-  --cc-primary: #3b82f6;
-  --cc-primary-hover: #60a5fa;
-  --cc-primary-light: rgba(59, 130, 246, 0.15);
-  --cc-primary-glow: rgba(59, 130, 246, 0.2);
+  /* ▸ Borders — Navy borders */
+  --cc-border: #2D3748;
+  --cc-border-strong: #3D4A5C;
+  --cc-border-dark: #F8FAFC;
+  --cc-border-hover: #4A5568;
   
-  /* Borders & Shadows */
-  --cc-border: rgba(255, 255, 255, 0.08);
-  --cc-border-strong: rgba(255, 255, 255, 0.12);
-  --cc-border-glass: rgba(255, 255, 255, 0.1);
-  --cc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --cc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --cc-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
-  --cc-shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --cc-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.35);
+  /* ▸ Primary — Azul brilhante no dark */
+  --cc-primary: #60A5FA;
+  --cc-primary-hover: #93C5FD;
+  --cc-primary-light: rgba(96, 165, 250, 0.15);
+  --cc-primary-muted: rgba(96, 165, 250, 0.1);
   
-  /* Semantic */
-  --cc-success: #10b981;
-  --cc-success-light: rgba(16, 185, 129, 0.15);
-  --cc-warning: #f59e0b;
-  --cc-warning-light: rgba(245, 158, 11, 0.15);
-  --cc-danger: #ef4444;
-  --cc-danger-light: rgba(239, 68, 68, 0.15);
-  --cc-info: #06b6d4;
-  --cc-info-light: rgba(6, 182, 212, 0.15);
+  /* ▸ Semantic — Cores vibrantes para dark */
+  --cc-success: #4ADE80;
+  --cc-success-light: rgba(74, 222, 128, 0.15);
+  --cc-warning: #FBBF24;
+  --cc-warning-light: rgba(251, 191, 36, 0.15);
+  --cc-error: #F87171;
+  --cc-danger: #F87171;
+  --cc-danger-light: rgba(248, 113, 113, 0.15);
+  --cc-info: #38BDF8;
+  --cc-info-light: rgba(56, 189, 248, 0.15);
   
-  /* Action Bar */
-  --cc-action-bar-bg: rgba(15, 23, 42, 0.9);
+  /* ▸ Shadows */
+  --cc-shadow-focus: 0 0 0 2px rgba(96, 165, 250, 0.4);
+  --cc-shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.5);
   
   color-scheme: dark;
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
    RESET & BASE
-   ───────────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 *,
 *::before,
@@ -175,16 +188,11 @@ body {
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   
-  /* Background com vida */
+  /* Background sólido — sem gradientes */
   background-color: var(--cc-bg);
-  background-image: 
-    var(--cc-bg-vignette),
-    var(--cc-bg-radial-1),
-    var(--cc-bg-radial-2),
-    var(--cc-bg-gradient);
-  background-attachment: fixed;
   
-  transition: background-color 300ms ease;
+  /* Transição suave para mudança de tema */
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 #root {
@@ -194,20 +202,21 @@ body {
   min-height: -webkit-fill-available;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   TIPOGRAFIA
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIPOGRAFIA — MODERN CLEAN (Sans-Serif Unificado)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Headings — Sans-Serif SemiBold, Tracking Tight */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--cc-font-body);
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.25;
+  line-height: 1.2;
   color: var(--cc-text);
 }
 
 h1 {
-  font-size: 1.875rem;
-  font-weight: 700;
+  font-size: 1.75rem;
 }
 
 h2 {
@@ -215,65 +224,89 @@ h2 {
 }
 
 h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
   font-size: 1rem;
 }
 
+/* Parágrafos */
 p {
+  font-family: var(--cc-font-body);
+  font-weight: 400;
   color: var(--cc-text-secondary);
+  line-height: 1.6;
 }
 
+/* Texto pequeno */
 small {
   font-size: 0.8125rem;
-  color: var(--cc-text-muted);
+  color: var(--cc-text-tertiary);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   LINKS
-   ───────────────────────────────────────────────────────────── */
+/* Botões — Medium weight */
+button {
+  font-family: var(--cc-font-body);
+  font-weight: 500;
+}
+
+/* Inputs */
+input, textarea, select {
+  font-family: var(--cc-font-body);
+  font-weight: 400;
+}
+
+/* Dados numéricos — tabular-nums para alinhamento */
+.mono,
+code,
+pre,
+[data-numeric],
+.data-value {
+  font-family: var(--cc-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LINKS — Azul Link tradicional
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 a {
   color: var(--cc-primary);
-  text-decoration: none;
-  transition: color 150ms ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 100ms ease;
 }
 
 a:hover {
   color: var(--cc-primary-hover);
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
    SELEÇÃO
-   ───────────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 ::selection {
-  background: var(--cc-primary-light);
-  color: var(--cc-text);
+  background: var(--cc-primary);
+  color: var(--cc-text-inverse);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   FOCUS RINGS
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS RINGS — Claros e precisos
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 :focus {
   outline: none;
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--cc-shadow-focus);
-  border-radius: var(--cc-radius-sm);
+  outline: 2px solid var(--cc-primary);
+  outline-offset: 2px;
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  box-shadow: var(--cc-shadow-focus);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   SCROLLBAR
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR — Minimal
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -286,50 +319,55 @@ textarea:focus-visible {
 
 ::-webkit-scrollbar-thumb {
   background: var(--cc-border-strong);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--cc-text-muted);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   CARD GLASS (classe global)
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARDS — Bordas sólidas, sem sombras
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .cc-card {
   background: var(--cc-surface);
   border: 1px solid var(--cc-border);
-  border-radius: var(--cc-radius-lg);
-  box-shadow: var(--cc-shadow-glass);
-  backdrop-filter: var(--cc-blur);
-  -webkit-backdrop-filter: var(--cc-blur);
-  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+  border-radius: var(--cc-radius-sm);
+  /* Sem sombra, sem blur */
+  transition: border-color 150ms ease;
+}
+
+.cc-card:hover {
+  border-color: var(--cc-border-strong);
 }
 
 .cc-card-solid {
   background: var(--cc-surface-solid);
   border: 1px solid var(--cc-border);
-  border-radius: var(--cc-radius-lg);
-  box-shadow: var(--cc-shadow-md);
-  transition: background 300ms ease;
+  border-radius: var(--cc-radius-sm);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   BOTÕES - Micro hover shift
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTÕES — Sem micro-animations exageradas
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-button:not(:disabled):hover {
-  transform: translateY(-1px);
+button {
+  font-family: var(--cc-font-body);
+  cursor: pointer;
+  transition: background-color 100ms ease, border-color 100ms ease;
 }
 
-button:not(:disabled):active {
-  transform: translateY(0);
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* Removido: translateY hover animation */
+
+/* ═══════════════════════════════════════════════════════════════════════════
    UTILITÁRIOS
-   ───────────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .sr-only {
   position: absolute;
@@ -343,9 +381,19 @@ button:not(:disabled):active {
   border-width: 0;
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* Texto monospace para dados */
+.font-mono {
+  font-family: var(--cc-font-mono);
+}
+
+/* Texto serifado para títulos */
+.font-heading {
+  font-family: var(--cc-font-heading);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVO
-   ───────────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
   :root {
@@ -353,50 +401,21 @@ button:not(:disabled):active {
   }
   
   h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 }
 
 @media (max-width: 640px) {
-  body {
-    background-attachment: scroll;
+  h1 {
+    font-size: 1.5rem;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   ACTION BAR
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTÕES — Estilos globais Swiss Ledger
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 90;
-  
-  background: var(--cc-action-bar-bg);
-  backdrop-filter: var(--cc-blur);
-  -webkit-backdrop-filter: var(--cc-blur);
-  border-top: 1px solid var(--cc-border);
-  
-  padding-bottom: env(safe-area-inset-bottom);
-  transition: background 300ms ease;
-}
-
-.action-bar__inner {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 16px 24px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.action-bar__btn {
+.btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -404,64 +423,59 @@ button:not(:disabled):active {
   
   min-height: 48px;
   padding: 14px 32px;
-  width: 100%;
-  max-width: 320px;
   
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
+  font-family: var(--cc-font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
   color: var(--cc-text-inverse);
-  background: var(--cc-primary);
+  background: var(--cc-text);
   border: none;
-  border-radius: var(--cc-radius-lg);
   cursor: pointer;
   
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition: background-color 100ms ease;
 }
 
-.action-bar__btn:hover:not(:disabled) {
-  background: var(--cc-primary-hover);
-  transform: translateY(-1px);
+.btn-primary:hover:not(:disabled) {
+  background: var(--cc-text-secondary);
 }
 
-.action-bar__btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.action-bar__btn:disabled {
-  opacity: 0.5;
+.btn-primary:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-.action-bar__helper {
-  display: flex;
+.btn-secondary {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   
-  font-size: 0.75rem;
-  color: var(--cc-text-muted);
-  text-align: center;
-}
-
-.action-bar__helper svg {
-  flex-shrink: 0;
-}
-
-@media (max-width: 640px) {
-  .action-bar__inner {
-    padding: 14px 16px;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
-  }
+  min-height: 40px;
+  padding: 10px 20px;
   
-  .action-bar__btn {
-    max-width: 100%;
-    min-height: 44px;
-    padding: 12px 24px;
-  }
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--cc-font-body);
+  
+  color: var(--cc-text);
+  background: transparent;
+  border: 1px solid var(--cc-border);
+  cursor: pointer;
+  
+  transition: border-color 100ms ease, background-color 100ms ease;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   THEME TOGGLE BUTTON
-   ───────────────────────────────────────────────────────────── */
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--cc-text);
+  background: var(--cc-surface-hover);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME TOGGLE — Botão de alternar tema
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .theme-toggle {
   display: flex;
@@ -471,19 +485,18 @@ button:not(:disabled):active {
   height: 36px;
   padding: 0;
   
-  background: var(--cc-surface-2);
+  background: transparent;
   border: 1px solid var(--cc-border);
-  border-radius: var(--cc-radius-md);
+  border-radius: var(--cc-radius-sm);
   
   color: var(--cc-text-secondary);
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: border-color 100ms ease, color 100ms ease;
 }
 
 .theme-toggle:hover {
-  background: var(--cc-primary-light);
-  border-color: var(--cc-primary);
-  color: var(--cc-primary);
+  border-color: var(--cc-text);
+  color: var(--cc-text);
 }
 
 .theme-toggle svg {
@@ -491,67 +504,92 @@ button:not(:disabled):active {
   height: 18px;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   BADGES
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGES — Etiquetas informativas
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .cc-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  font-family: var(--cc-font-body);
   font-weight: 500;
+  font-size: 0.75rem;
   line-height: 1;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border-radius: var(--cc-radius-sm);
   border: 1px solid;
   white-space: nowrap;
-  transition: background 200ms ease, border-color 200ms ease;
 }
 
 .cc-badge--success {
   color: var(--cc-success);
   background: var(--cc-success-light);
   border-color: var(--cc-success);
-  border-color: rgba(5, 150, 105, 0.25);
 }
 
 .cc-badge--info {
   color: var(--cc-info);
   background: var(--cc-info-light);
-  border-color: rgba(8, 145, 178, 0.25);
+  border-color: var(--cc-info);
 }
 
 .cc-badge--warning {
   color: var(--cc-warning);
   background: var(--cc-warning-light);
-  border-color: rgba(217, 119, 6, 0.3);
+  border-color: var(--cc-warning);
 }
 
 .cc-badge--error {
-  color: var(--cc-danger);
+  color: var(--cc-error);
   background: var(--cc-danger-light);
-  border-color: rgba(220, 38, 38, 0.25);
+  border-color: var(--cc-error);
 }
 
 .cc-badge--neutral {
   color: var(--cc-text-secondary);
-  background: var(--cc-surface-2);
+  background: var(--cc-bg-muted);
   border-color: var(--cc-border);
 }
 
-/* Dark mode badge adjustments */
-html[data-theme="dark"] .cc-badge--success {
-  border-color: rgba(16, 185, 129, 0.35);
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABELAS — Alta densidade, monospace para dados
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--cc-font-body);
+  font-size: 0.875rem;
 }
 
-html[data-theme="dark"] .cc-badge--info {
-  border-color: rgba(6, 182, 212, 0.35);
+th {
+  font-family: var(--cc-font-body);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cc-text-tertiary);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--cc-border-strong);
+  background: var(--cc-bg-muted);
 }
 
-html[data-theme="dark"] .cc-badge--warning {
-  border-color: rgba(245, 158, 11, 0.35);
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cc-border);
+  color: var(--cc-text);
 }
 
-html[data-theme="dark"] .cc-badge--error {
-  border-color: rgba(239, 68, 68, 0.35);
+/* Dados numéricos em células */
+td[data-numeric],
+td.numeric {
+  font-family: var(--cc-font-mono);
+  text-align: right;
+}
+
+tr:hover td {
+  background: var(--cc-surface-hover);
 }

@@ -15,7 +15,6 @@ interface FileUploadCardProps {
   }
   metrics?: KeyValueItem[]
   formatInfo?: string
-  showPreviewLink?: boolean
   loading?: boolean
 }
 
@@ -33,7 +32,6 @@ export function FileUploadCard({
   badge,
   metrics,
   formatInfo,
-  showPreviewLink,
   loading,
 }: FileUploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -147,9 +145,6 @@ export function FileUploadCard({
             <div className="file-card-footer">
               <div className="file-card-footer-left">
                 {formatInfo && <span className="file-card-format">{formatInfo}</span>}
-                {showPreviewLink && (
-                  <button className="file-card-link">Ver prévia</button>
-                )}
               </div>
               <div className="file-card-footer-right">
                 <button className="file-card-link" onClick={handleClick}>

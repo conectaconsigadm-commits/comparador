@@ -154,7 +154,7 @@ function DetailsList({ details }: { details: ProcessingDetails }) {
     <ul className="details-list">
       {details.bankLines !== undefined && (
         <li>
-          <BulletIcon /> TXT lido: <strong>{details.bankLines} linhas</strong>
+          <BulletIcon /> Arquivo do banco: <strong>{details.bankLines} linhas</strong>
         </li>
       )}
       {details.prefFormat && (

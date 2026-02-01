@@ -56,45 +56,78 @@ function UploadIllustration({ width, height, isDark }: IllustrationSvgProps) {
     bg: '#1e293b',
     bgLight: '#334155',
     accent: '#3b82f6',
-    accentLight: 'rgba(59, 130, 246, 0.3)',
+    accentLight: 'rgba(59, 130, 246, 0.25)',
     line: '#475569',
+    lineLight: '#64748b',
     check: '#10b981',
+    shadow: 'rgba(0, 0, 0, 0.3)',
   } : {
-    bg: '#e2e8f0',
-    bgLight: '#f1f5f9',
-    accent: '#2563eb',
-    accentLight: 'rgba(37, 99, 235, 0.15)',
+    bg: '#ffffff',
+    bgLight: '#f8fafc',
+    accent: '#0070f3',
+    accentLight: 'rgba(0, 112, 243, 0.12)',
     line: '#cbd5e1',
+    lineLight: '#e2e8f0',
     check: '#059669',
+    shadow: 'rgba(0, 0, 0, 0.08)',
   }
 
   return (
     <svg width={width} height={height} viewBox="0 0 180 140" fill="none">
-      {/* Document 1 */}
-      <rect x="25" y="30" width="52" height="68" rx="6" fill={colors.bg} stroke={colors.line} strokeWidth="1.5" />
-      <rect x="34" y="44" width="34" height="4" rx="2" fill={colors.line} />
-      <rect x="34" y="54" width="28" height="4" rx="2" fill={colors.line} />
-      <rect x="34" y="64" width="32" height="4" rx="2" fill={colors.line} />
-      <rect x="34" y="74" width="20" height="4" rx="2" fill={colors.line} />
+      {/* Background glow */}
+      <ellipse cx="90" cy="70" rx="70" ry="50" fill={colors.accentLight} opacity="0.5" />
       
-      {/* Document 2 */}
-      <rect x="103" y="30" width="52" height="68" rx="6" fill={colors.bg} stroke={colors.line} strokeWidth="1.5" />
-      <rect x="112" y="44" width="34" height="4" rx="2" fill={colors.line} />
-      <rect x="112" y="54" width="28" height="4" rx="2" fill={colors.line} />
-      <rect x="112" y="64" width="32" height="4" rx="2" fill={colors.line} />
-      <rect x="112" y="74" width="20" height="4" rx="2" fill={colors.line} />
+      {/* Document 1 - Banco */}
+      <g filter="url(#shadow1)">
+        <rect x="22" y="28" width="54" height="70" rx="8" fill={colors.bg} />
+        <rect x="22" y="28" width="54" height="70" rx="8" stroke={colors.line} strokeWidth="1" />
+      </g>
+      <rect x="22" y="28" width="54" height="16" rx="8" fill={colors.accent} opacity="0.1" />
+      <rect x="22" y="28" width="54" height="16" rx="8" fill="none" stroke={colors.line} strokeWidth="1" />
+      <circle cx="32" cy="36" r="3" fill={colors.accent} opacity="0.6" />
+      <rect x="40" y="34" width="28" height="4" rx="2" fill={colors.line} />
+      <rect x="30" y="52" width="38" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="30" y="60" width="32" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="30" y="68" width="36" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="30" y="76" width="24" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="30" y="84" width="30" height="3" rx="1.5" fill={colors.lineLight} />
       
-      {/* Arrow */}
-      <path d="M82 64 L90 56 L90 60 L98 60 L98 68 L90 68 L90 72 Z" fill={colors.accent} opacity="0.8" />
+      {/* Document 2 - Prefeitura */}
+      <g filter="url(#shadow1)">
+        <rect x="104" y="28" width="54" height="70" rx="8" fill={colors.bg} />
+        <rect x="104" y="28" width="54" height="70" rx="8" stroke={colors.line} strokeWidth="1" />
+      </g>
+      <rect x="104" y="28" width="54" height="16" rx="8" fill={colors.check} opacity="0.1" />
+      <rect x="104" y="28" width="54" height="16" rx="8" fill="none" stroke={colors.line} strokeWidth="1" />
+      <circle cx="114" cy="36" r="3" fill={colors.check} opacity="0.6" />
+      <rect x="122" y="34" width="28" height="4" rx="2" fill={colors.line} />
+      <rect x="112" y="52" width="38" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="112" y="60" width="32" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="112" y="68" width="36" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="112" y="76" width="24" height="3" rx="1.5" fill={colors.lineLight} />
+      <rect x="112" y="84" width="30" height="3" rx="1.5" fill={colors.lineLight} />
       
-      {/* Success circle */}
-      <circle cx="90" cy="110" r="16" fill={colors.accentLight} />
-      <path d="M82 110 L87 115 L98 104" stroke={colors.check} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Connecting arrows */}
+      <path d="M80 55 L90 55 M90 50 L98 55 L90 60" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.8" />
+      <path d="M80 65 L90 65 M90 60 L98 65 L90 70" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.6" />
+      <path d="M80 75 L90 75 M90 70 L98 75 L90 80" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.4" />
       
-      {/* Decorative dots */}
-      <circle cx="30" cy="20" r="3" fill={colors.accent} opacity="0.4" />
-      <circle cx="150" cy="25" r="4" fill={colors.accent} opacity="0.3" />
-      <circle cx="160" cy="100" r="2" fill={colors.accent} opacity="0.2" />
+      {/* Success badge */}
+      <circle cx="90" cy="112" r="16" fill={colors.check} opacity="0.15" />
+      <circle cx="90" cy="112" r="12" fill={colors.check} opacity="0.2" />
+      <path d="M83 112 L87 116 L97 106" stroke={colors.check} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      
+      {/* Decorative elements */}
+      <circle cx="25" cy="18" r="2.5" fill={colors.accent} opacity="0.5" />
+      <circle cx="155" cy="22" r="3" fill={colors.accent} opacity="0.4" />
+      <circle cx="165" cy="95" r="2" fill={colors.check} opacity="0.4" />
+      <circle cx="15" cy="80" r="2" fill={colors.accent} opacity="0.3" />
+      
+      <defs>
+        <filter id="shadow1" x="-4" y="-2" width="66" height="82" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={colors.shadow} floodOpacity="1" />
+        </filter>
+      </defs>
     </svg>
   )
 }
@@ -106,49 +139,72 @@ function ProcessingIllustration({ width, height, isDark }: IllustrationSvgProps)
     accent: '#3b82f6',
     accentLight: 'rgba(59, 130, 246, 0.2)',
     line: '#475569',
+    lineLight: '#64748b',
     check: '#10b981',
-    checkBg: 'rgba(16, 185, 129, 0.2)',
+    checkBg: 'rgba(16, 185, 129, 0.25)',
+    shadow: 'rgba(0, 0, 0, 0.3)',
   } : {
-    bg: '#e2e8f0',
-    bgLight: '#f1f5f9',
-    accent: '#2563eb',
-    accentLight: 'rgba(37, 99, 235, 0.12)',
+    bg: '#ffffff',
+    bgLight: '#f8fafc',
+    accent: '#0070f3',
+    accentLight: 'rgba(0, 112, 243, 0.12)',
     line: '#cbd5e1',
+    lineLight: '#e2e8f0',
     check: '#059669',
-    checkBg: 'rgba(5, 150, 105, 0.12)',
+    checkBg: 'rgba(5, 150, 105, 0.15)',
+    shadow: 'rgba(0, 0, 0, 0.08)',
   }
 
   return (
     <svg width={width} height={height} viewBox="0 0 200 150" fill="none">
+      {/* Background glow */}
+      <ellipse cx="100" cy="75" rx="60" ry="45" fill={colors.accentLight} opacity="0.5" />
+      
+      {/* Clipboard shadow */}
+      <rect x="58" y="24" width="84" height="106" rx="10" fill={colors.shadow} opacity="0.3" />
+      
       {/* Clipboard */}
-      <rect x="55" y="20" width="90" height="110" rx="8" fill={colors.bg} stroke={colors.line} strokeWidth="1.5" />
+      <rect x="55" y="20" width="90" height="110" rx="10" fill={colors.bg} />
+      <rect x="55" y="20" width="90" height="110" rx="10" stroke={colors.line} strokeWidth="1" />
       
       {/* Clip top */}
-      <rect x="80" y="12" width="40" height="16" rx="4" fill={colors.bgLight} stroke={colors.line} strokeWidth="1" />
-      <rect x="88" y="17" width="24" height="6" rx="2" fill={colors.line} />
+      <rect x="78" y="10" width="44" height="18" rx="6" fill={colors.bgLight} stroke={colors.line} strokeWidth="1" />
+      <rect x="86" y="16" width="28" height="6" rx="3" fill={colors.line} />
       
-      {/* Lines */}
-      <rect x="70" y="42" width="60" height="5" rx="2.5" fill={colors.line} />
-      <rect x="70" y="55" width="50" height="5" rx="2.5" fill={colors.line} />
-      <rect x="70" y="68" width="55" height="5" rx="2.5" fill={colors.line} />
-      <rect x="70" y="81" width="40" height="5" rx="2.5" fill={colors.line} />
+      {/* Progress header */}
+      <rect x="55" y="20" width="90" height="20" rx="10" fill={colors.accent} opacity="0.08" />
       
-      {/* Check circles */}
-      <circle cx="75" cy="102" r="10" fill={colors.checkBg} />
-      <path d="M70 102 L73 105 L80 98" stroke={colors.check} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Lines with varying lengths */}
+      <rect x="68" y="48" width="64" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="68" y="58" width="52" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="68" y="68" width="58" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="68" y="78" width="42" height="4" rx="2" fill={colors.lineLight} />
       
-      <circle cx="100" cy="102" r="10" fill={colors.checkBg} />
-      <path d="M95 102 L98 105 L105 98" stroke={colors.check} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Check circles - completed steps */}
+      <circle cx="75" cy="100" r="11" fill={colors.checkBg} />
+      <circle cx="75" cy="100" r="8" fill={colors.check} opacity="0.2" />
+      <path d="M70 100 L73 103 L80 96" stroke={colors.check} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       
-      {/* Spinner */}
-      <circle cx="125" cy="102" r="9" stroke={colors.accentLight} strokeWidth="2" fill="none" />
-      <path d="M125 93 a9 9 0 0 1 9 9" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" fill="none">
-        <animateTransform attributeName="transform" type="rotate" from="0 125 102" to="360 125 102" dur="1s" repeatCount="indefinite" />
+      <circle cx="100" cy="100" r="11" fill={colors.checkBg} />
+      <circle cx="100" cy="100" r="8" fill={colors.check} opacity="0.2" />
+      <path d="M95 100 L98 103 L105 96" stroke={colors.check} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      
+      {/* Spinner - current step */}
+      <circle cx="125" cy="100" r="11" fill={colors.accentLight} />
+      <circle cx="125" cy="100" r="8" stroke={colors.accentLight} strokeWidth="2" fill="none" />
+      <path d="M125 92 a8 8 0 0 1 8 8" stroke={colors.accent} strokeWidth="2.5" strokeLinecap="round" fill="none">
+        <animateTransform attributeName="transform" type="rotate" from="0 125 100" to="360 125 100" dur="0.8s" repeatCount="indefinite" />
       </path>
       
-      {/* Decorative */}
-      <circle cx="40" cy="40" r="4" fill={colors.accent} opacity="0.3" />
-      <circle cx="165" cy="50" r="3" fill={colors.check} opacity="0.3" />
+      {/* Progress bar */}
+      <rect x="68" y="118" width="64" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="68" y="118" width="40" height="4" rx="2" fill={colors.accent} opacity="0.7" />
+      
+      {/* Decorative elements */}
+      <circle cx="38" cy="35" r="3" fill={colors.accent} opacity="0.4" />
+      <circle cx="165" cy="45" r="2.5" fill={colors.check} opacity="0.4" />
+      <circle cx="170" cy="115" r="2" fill={colors.accent} opacity="0.3" />
+      <circle cx="30" cy="100" r="2" fill={colors.check} opacity="0.3" />
     </svg>
   )
 }
@@ -160,40 +216,62 @@ function ResultIllustration({ width, height, isDark }: IllustrationSvgProps) {
     accent: '#3b82f6',
     accentLight: 'rgba(59, 130, 246, 0.2)',
     line: '#475569',
+    lineLight: '#64748b',
     check: '#10b981',
     checkBg: 'rgba(16, 185, 129, 0.25)',
     star: '#fbbf24',
+    shadow: 'rgba(0, 0, 0, 0.3)',
   } : {
-    bg: '#e2e8f0',
-    bgLight: '#f1f5f9',
-    accent: '#2563eb',
-    accentLight: 'rgba(37, 99, 235, 0.12)',
+    bg: '#ffffff',
+    bgLight: '#f8fafc',
+    accent: '#0070f3',
+    accentLight: 'rgba(0, 112, 243, 0.12)',
     line: '#cbd5e1',
+    lineLight: '#e2e8f0',
     check: '#059669',
     checkBg: 'rgba(5, 150, 105, 0.15)',
     star: '#f59e0b',
+    shadow: 'rgba(0, 0, 0, 0.08)',
   }
 
   return (
     <svg width={width} height={height} viewBox="0 0 180 140" fill="none">
-      {/* Document */}
-      <rect x="45" y="15" width="90" height="105" rx="8" fill={colors.bg} stroke={colors.line} strokeWidth="1.5" />
+      {/* Background glow - success themed */}
+      <ellipse cx="90" cy="70" rx="65" ry="50" fill={colors.checkBg} opacity="0.6" />
       
-      {/* Lines */}
-      <rect x="60" y="32" width="60" height="5" rx="2.5" fill={colors.line} />
-      <rect x="60" y="45" width="50" height="5" rx="2.5" fill={colors.line} />
-      <rect x="60" y="58" width="55" height="5" rx="2.5" fill={colors.line} />
-      <rect x="60" y="71" width="40" height="5" rx="2.5" fill={colors.line} />
+      {/* Document shadow */}
+      <rect x="48" y="18" width="84" height="100" rx="10" fill={colors.shadow} opacity="0.3" />
+      
+      {/* Document */}
+      <rect x="45" y="14" width="90" height="105" rx="10" fill={colors.bg} />
+      <rect x="45" y="14" width="90" height="105" rx="10" stroke={colors.line} strokeWidth="1" />
+      
+      {/* Success header */}
+      <rect x="45" y="14" width="90" height="22" rx="10" fill={colors.check} opacity="0.1" />
+      <rect x="45" y="14" width="90" height="22" rx="10" fill="none" stroke={colors.line} strokeWidth="1" />
+      <circle cx="58" cy="25" r="4" fill={colors.check} opacity="0.4" />
+      <rect x="68" y="22" width="55" height="6" rx="3" fill={colors.lineLight} />
+      
+      {/* Content lines */}
+      <rect x="58" y="44" width="64" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="58" y="54" width="52" height="4" rx="2" fill={colors.lineLight} />
+      <rect x="58" y="64" width="58" height="4" rx="2" fill={colors.lineLight} />
       
       {/* Big success checkmark */}
-      <circle cx="90" cy="98" r="20" fill={colors.checkBg} />
-      <path d="M79 98 L86 105 L101 90" stroke={colors.check} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="90" cy="96" r="22" fill={colors.check} opacity="0.12" />
+      <circle cx="90" cy="96" r="17" fill={colors.check} opacity="0.18" />
+      <circle cx="90" cy="96" r="12" fill={colors.check} opacity="0.25" />
+      <path d="M82 96 L87 101 L98 90" stroke={colors.check} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       
-      {/* Stars/sparkles */}
-      <path d="M35 45 L37 40 L39 45 L44 47 L39 49 L37 54 L35 49 L30 47 Z" fill={colors.star} opacity="0.6" />
-      <path d="M145 35 L147 31 L149 35 L153 37 L149 39 L147 43 L145 39 L141 37 Z" fill={colors.star} opacity="0.5" />
-      <circle cx="155" cy="90" r="3" fill={colors.accent} opacity="0.4" />
-      <circle cx="25" cy="80" r="2" fill={colors.accent} opacity="0.3" />
+      {/* Stars/sparkles - celebration */}
+      <path d="M32 42 L34.5 36 L37 42 L43 44.5 L37 47 L34.5 53 L32 47 L26 44.5 Z" fill={colors.star} opacity="0.7" />
+      <path d="M148 30 L150 25 L152 30 L157 32 L152 34 L150 39 L148 34 L143 32 Z" fill={colors.star} opacity="0.6" />
+      <path d="M155 75 L156.5 71 L158 75 L162 76.5 L158 78 L156.5 82 L155 78 L151 76.5 Z" fill={colors.star} opacity="0.4" />
+      
+      {/* Decorative circles */}
+      <circle cx="25" cy="75" r="2.5" fill={colors.accent} opacity="0.4" />
+      <circle cx="160" cy="105" r="2" fill={colors.check} opacity="0.4" />
+      <circle cx="20" cy="25" r="2" fill={colors.star} opacity="0.4" />
     </svg>
   )
 }

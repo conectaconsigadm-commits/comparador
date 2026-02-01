@@ -1,17 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Card } from '../components/Card'
-import { FileUploadCard } from '../components/FileUploadCard'
+import { useState, useEffect, useRef, type DragEvent, type ChangeEvent } from 'react'
 import { InlineBanner } from '../components/InlineBanner'
-import { ActionBar } from '../components/ActionBar'
-import { Illustration } from '../components/Illustration'
 import { BankParser } from '../../core/bank/BankParser'
 import { PrefeituraExtractor } from '../../core/prefeitura/PrefeituraExtractor'
-import type { KeyValueItem } from '../components/KeyValueList'
 import type { BankParsedData, PrefeituraParsedData } from '../state/appState'
 
-// ─────────────────────────────────────────────────────────────
-// TIPOS DE ESTADO LOCAL
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// TIPOS
+// ═══════════════════════════════════════════════════════════════════════════
 
 interface BankStats {
   lines: number
@@ -36,10 +31,10 @@ interface UploadScreenProps {
   canGenerate?: boolean
 }
 
-/**
- * Tela 1 - Upload de arquivos
- * Layout 2 colunas com leitura real dos arquivos
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// UPLOAD SCREEN — Swiss Ledger Design
+// ═══════════════════════════════════════════════════════════════════════════
+
 export function UploadScreen({
   onGenerate,
   onBankParsed,
@@ -64,9 +59,9 @@ export function UploadScreen({
       ? canGenerateProp
       : bankStats?.ok && prefStats?.extracao !== 'falhou' && !prefStats?.isUnknownFormat
 
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
   // LEITURA DO BANCO (TXT)
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!bankFile) {
@@ -89,7 +84,6 @@ export function UploadScreen({
         }
         setBankStats(stats)
 
-        // Passar dados completos para o App
         onBankParsed?.({
           rows: result.rows,
           diagnostics: result.diagnostics,
@@ -98,11 +92,7 @@ export function UploadScreen({
         })
       })
       .catch(() => {
-        setBankStats({
-          lines: 0,
-          ok: false,
-          diagnosticsCount: 1,
-        })
+        setBankStats({ lines: 0, ok: false, diagnosticsCount: 1 })
         onBankParsed?.(null)
       })
       .finally(() => {
@@ -110,9 +100,9 @@ export function UploadScreen({
       })
   }, [bankFile, onBankParsed])
 
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
   // LEITURA DA PREFEITURA
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!prefFile) {
@@ -154,7 +144,6 @@ export function UploadScreen({
         }
         setPrefStats(stats)
 
-        // Passar dados completos para o App
         onPrefParsed?.({
           rows: result.rows,
           diagnostics: result.diagnostics,
@@ -179,330 +168,892 @@ export function UploadScreen({
       })
   }, [prefFile, onPrefParsed])
 
-  // ─────────────────────────────────────────────────────────────
-  // MÉTRICAS PARA OS CARDS
-  // ─────────────────────────────────────────────────────────────
-
-  const bankMetrics: KeyValueItem[] | undefined = bankStats
-    ? [
-        { label: 'Linhas lidas', value: bankStats.lines, icon: 'bullet' },
-        {
-          label: 'Competência detectada',
-          value: bankStats.competencia,
-          icon: 'bullet',
-        },
-      ]
-    : undefined
-
-  const prefMetrics: KeyValueItem[] | undefined = prefStats
-    ? [
-        { label: 'Linhas extraídas', value: prefStats.extracted, icon: 'bullet' },
-        {
-          label: 'Extração',
-          value: prefStats.extracao,
-          icon: 'bullet',
-        },
-      ]
-    : undefined
-
-  // ─────────────────────────────────────────────────────────────
-  // HANDLER
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleGenerate = () => {
     onGenerate?.()
   }
 
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
   // RENDER
-  // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="upload-screen">
-      {/* Header */}
-      <header className="upload-header">
-        <h1 className="upload-title">Validar consignados</h1>
-        <p className="upload-subtitle">
-          Envie o TXT do banco e o arquivo da prefeitura. Baixe um Excel com o
-          resultado.
-        </p>
-      </header>
-
-      {/* Grid principal */}
+    <div className="upload">
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYOUT PRINCIPAL — 2 colunas
+          Esquerda: Título + Cards
+          Direita: Uploads + Botão
+          ═══════════════════════════════════════════════════════════════════ */}
       <div className="upload-grid">
-        {/* Coluna esquerda - Cards de upload */}
+        {/* ─────────────────────────────────────────────────────────────────
+            COLUNA ESQUERDA — Título + Instruções + Você vai receber
+            ───────────────────────────────────────────────────────────────── */}
         <div className="upload-left">
-          {/* Card 1: TXT do banco */}
-          <FileUploadCard
-            title="TXT do banco (obrigatório)"
-            stepNumber={1}
+          <header className="upload-header">
+            <h1 className="upload-title">VALIDAR CONSIGNADOS</h1>
+            <p className="upload-subtitle">
+              Depósito de arquivos para reconciliação automática.
+            </p>
+          </header>
+
+          {/* Card: Instruções */}
+          <div className="upload-card">
+            <h3 className="upload-card-title">INSTRUÇÕES</h3>
+            <ol className="upload-card-list">
+              <li>O <strong>arquivo do banco</strong> é o TXT de débitos.</li>
+              <li>O <strong>arquivo da prefeitura</strong> é a folha de consignados.</li>
+              <li>Você receberá um <strong>Excel</strong> com o cruzamento.</li>
+            </ol>
+          </div>
+
+          {/* Card: Você vai receber */}
+          <div className="upload-card">
+            <h3 className="upload-card-title">VOCÊ VAI RECEBER</h3>
+            <ul className="upload-result-tags">
+              <li>Resumo</li>
+              <li>Bateram</li>
+              <li>Só Banco</li>
+              <li>Só Prefeitura</li>
+              <li>Divergências</li>
+              <li>Diagnósticos</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            COLUNA DIREITA — Uploads + Botão
+            ───────────────────────────────────────────────────────────────── */}
+        <div className="upload-right">
+          {/* Área 1: Arquivo do Banco */}
+          <UploadZone
+            label="ARQUIVO DO BANCO"
+            sublabel="Arquivo de débito em formato TXT"
             accept=".txt"
-            hint="Arquivo de débito do banco"
+            icon="txt"
             file={bankFile}
             onFile={setBankFile}
             loading={bankLoading}
-            badge={
+            status={
               bankStats
                 ? bankStats.ok
-                  ? { text: 'Lido com sucesso', variant: 'success' }
-                  : { text: 'Erro na leitura', variant: 'error' }
+                  ? { type: 'success', text: `${bankStats.lines} linhas lidas` }
+                  : { type: 'error', text: 'Erro na leitura' }
                 : undefined
             }
-            metrics={bankMetrics}
-            formatInfo={bankStats ? 'Formato: TXT fixo' : undefined}
+            meta={bankStats?.competencia ? `Competência: ${bankStats.competencia}` : undefined}
           />
 
-          {/* Card 2: Arquivo da prefeitura */}
-          <FileUploadCard
-            title="Arquivo da prefeitura (obrigatório)"
-            stepNumber={2}
+          {/* Área 2: Arquivo da Prefeitura */}
+          <UploadZone
+            label="ARQUIVO DA PREFEITURA"
+            sublabel="CSV, XLS, XLSX, PDF ou DOCX"
             accept=".csv,.xls,.xlsx,.pdf,.docx"
-            hint="CSV, XLS, XLSX, PDF ou DOCX"
+            icon="sheet"
             file={prefFile}
             onFile={setPrefFile}
             loading={prefLoading}
-            badge={
+            status={
               prefStats
                 ? prefStats.isUnknownFormat
-                  ? { text: 'Formato não suportado', variant: 'error' }
+                  ? { type: 'error', text: 'Formato não suportado' }
                   : prefStats.extracao === 'falhou'
-                  ? { text: 'Extração falhou', variant: 'error' }
+                  ? { type: 'error', text: 'Extração falhou' }
                   : prefStats.extracao === 'parcial'
-                  ? { text: `Formato: ${prefStats.formato}`, variant: 'warning' }
-                  : { text: `Formato: ${prefStats.formato}`, variant: 'info' }
+                  ? { type: 'warning', text: `${prefStats.extracted} linhas (parcial)` }
+                  : { type: 'success', text: `${prefStats.extracted} linhas extraídas` }
                 : undefined
             }
-            metrics={prefMetrics}
-            formatInfo={
+            meta={
               prefStats?.competencia
-                ? `Competência: ${prefStats.competencia}`
+                ? `Competência: ${prefStats.competencia} · Formato: ${prefStats.formato}`
                 : undefined
             }
-            showPreviewLink={!!prefStats && !prefStats.isUnknownFormat}
           />
 
-          {/* Banner de formato não suportado */}
+          {/* Banner de erro se formato não suportado */}
           {prefStats?.isUnknownFormat && (
             <InlineBanner variant="warning" title="Formato não suportado">
-              Por enquanto aceitamos apenas CSV. Converta o arquivo para CSV e
-              tente novamente.
+              Por enquanto aceitamos apenas CSV. Converta o arquivo para CSV e tente novamente.
             </InlineBanner>
           )}
-        </div>
 
-        {/* Coluna direita - Informações */}
-        <aside className="upload-right">
-          {/* Como funciona */}
-          <Card padding="md">
-            <h3 className="upload-info-title">Como funciona</h3>
-            <ul className="upload-bullet-list">
-              <li>O TXT do banco é a referência.</li>
-              <li>O arquivo da prefeitura pode variar.</li>
-              <li>O sistema compara e gera um Excel para conferência.</li>
-            </ul>
-          </Card>
-
-          {/* Você vai baixar */}
-          <Card padding="md">
-            <h3 className="upload-info-title">Você vai baixar</h3>
-            <ul className="upload-download-list">
-              <li>
-                <CheckIcon /> Resumo
-              </li>
-              <li>
-                <CheckIcon /> Bateu
-              </li>
-              <li>
-                <CheckIcon /> Só no banco
-              </li>
-              <li>
-                <CheckIcon /> Só na prefeitura
-              </li>
-              <li>
-                <CheckIcon /> Divergências
-              </li>
-              <li>
-                <CheckIcon /> Diagnósticos
-              </li>
-            </ul>
-          </Card>
-
-          {/* Ilustração */}
-          <div className="upload-illustration">
-            <Illustration name="upload" size="md" />
+          {/* ─────────────────────────────────────────────────────────────────
+              BOTÃO DE AÇÃO — Inline, alinhado à esquerda
+              ───────────────────────────────────────────────────────────────── */}
+          {/* Botão Gerar Relatório */}
+          <div className="upload-action">
+            <button
+              type="button"
+              className="upload-btn"
+              onClick={handleGenerate}
+              disabled={!canGenerate}
+            >
+              Gerar Relatório
+            </button>
+            <span className="upload-action-hint">
+              <LockIcon /> Processamento local. Nada é enviado para servidor.
+            </span>
           </div>
-        </aside>
+        </div>
       </div>
 
-      {/* Action Bar sticky com CTA */}
-      <ActionBar
-        primaryLabel="Gerar relatório"
-        onPrimary={handleGenerate}
-        primaryDisabled={!canGenerate}
-        helperText="Processamento local. Nada é enviado para servidor."
-      />
-
-      <style>{uploadScreenCSS}</style>
+      <style>{uploadCSS}</style>
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────
-// ÍCONES
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// COMPONENTE: UploadZone — Área de drop individual
+// ═══════════════════════════════════════════════════════════════════════════
 
-function CheckIcon() {
+interface UploadZoneProps {
+  label: string
+  sublabel: string
+  accept: string
+  icon: 'txt' | 'sheet'
+  file: File | null
+  onFile: (file: File | null) => void
+  loading?: boolean
+  status?: { type: 'success' | 'warning' | 'error'; text: string }
+  meta?: string
+}
+
+function UploadZone({
+  label,
+  sublabel,
+  accept,
+  icon,
+  file,
+  onFile,
+  loading,
+  status,
+  meta,
+}: UploadZoneProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const acceptedExtensions = accept.split(',').map((ext) => ext.trim().toLowerCase())
+
+  const validateFile = (f: File): boolean => {
+    const fileName = f.name.toLowerCase()
+    const isValid = acceptedExtensions.some((ext) => fileName.endsWith(ext))
+    if (!isValid) {
+      setError(`Use: ${acceptedExtensions.join(', ')}`)
+      return false
+    }
+    setError(null)
+    return true
+  }
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const droppedFile = e.dataTransfer.files[0]
+    if (droppedFile && validateFile(droppedFile)) {
+      onFile(droppedFile)
+    }
+  }
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null
+    if (selectedFile && validateFile(selectedFile)) {
+      onFile(selectedFile)
+    }
+    e.target.value = ''
+  }
+
+  const handleClick = () => {
+    inputRef.current?.click()
+  }
+
+  const handleRemove = () => {
+    onFile(null)
+    setError(null)
+  }
+
+  const formatSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const zoneClass = [
+    'zone',
+    isDragging && 'zone--dragging',
+    file && 'zone--has-file',
+    error && 'zone--error',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="var(--cc-success)"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ marginRight: '8px', flexShrink: 0 }}
-    >
-      <polyline points="20 6 9 17 4 12" />
+    <div className="upload-zone-wrapper">
+      <div className="upload-zone-header">
+        <span className="upload-zone-label">{label}</span>
+        <span className="upload-zone-sublabel">{sublabel}</span>
+      </div>
+
+      <div
+        className={zoneClass}
+        onClick={file ? undefined : handleClick}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          onChange={handleChange}
+          style={{ display: 'none' }}
+        />
+
+        {file ? (
+          <div className="zone-file">
+            <div className="zone-file-info">
+              {icon === 'txt' ? <TxtIcon /> : <SheetIcon />}
+              <div className="zone-file-details">
+                <span className="zone-file-name">{file.name}</span>
+                <span className="zone-file-size">{formatSize(file.size)}</span>
+              </div>
+            </div>
+            <div className="zone-file-actions">
+              {status && (
+                <span className={`zone-status zone-status--${status.type}`}>
+                  {status.text}
+                </span>
+              )}
+              <button type="button" className="zone-link" onClick={handleClick}>
+                Trocar
+              </button>
+              <button type="button" className="zone-link zone-link--remove" onClick={handleRemove}>
+                Remover
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="zone-empty">
+            {icon === 'txt' ? <TxtIcon /> : <SheetIcon />}
+            <div className="zone-empty-text">
+              <span className="zone-empty-cta">Arraste ou clique para selecionar</span>
+            </div>
+          </div>
+        )}
+
+        {loading && <div className="zone-loading" />}
+      </div>
+
+      {meta && <div className="upload-zone-meta">{meta}</div>}
+      {error && <div className="upload-zone-error">{error}</div>}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ÍCONES — Maiores e mais visíveis (stroke-width: 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function TxtIcon() {
+  return (
+    <div className="zone-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="8" y1="13" x2="16" y2="13" />
+        <line x1="8" y1="17" x2="16" y2="17" />
+      </svg>
+    </div>
+  )
+}
+
+function SheetIcon() {
+  return (
+    <div className="zone-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="8" y1="13" x2="16" y2="13" />
+        <line x1="8" y1="17" x2="16" y2="17" />
+        <line x1="10" y1="9" x2="10" y2="21" />
+      </svg>
+    </div>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0110 0v4" />
     </svg>
   )
 }
 
-// ─────────────────────────────────────────────────────────────
-// CSS
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// CSS — Modern Editorial Style (Pixel-Perfect Final)
+// ═══════════════════════════════════════════════════════════════════════════
 
-const uploadScreenCSS = `
-  .upload-screen {
+const uploadCSS = `
+  /* ═══════════════════════════════════════════════════════════════════════
+     UPLOAD — Container Centralizado (tendência ao topo - optical center)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .upload {
     width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    min-height: calc(100vh - 160px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 0 48px 0;
+    margin-top: -40px; /* Optical center - leve tendência ao topo */
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     GRID — Centralizado verticalmente (Desktop)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .upload-grid {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     COLUNA ESQUERDA — Contexto (mais compacta)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .upload-left {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
   }
 
   .upload-header {
-    margin-bottom: 32px;
+    margin: 0 0 24px 0;
   }
 
+  /* H1 — Sans-Serif, SemiBold */
   .upload-title {
-    font-size: 1.875rem;
-    font-weight: 700;
+    font-family: var(--cc-font-body);
+    font-size: 1.5rem;
+    font-weight: 600;
     color: var(--cc-text);
     letter-spacing: -0.02em;
-    margin-bottom: 6px;
+    line-height: 1.2;
+    margin: 0 0 8px 0;
+    padding: 0;
   }
 
   .upload-subtitle {
-    font-size: 16px;
+    font-family: var(--cc-font-body);
+    font-size: 0.9375rem;
+    color: var(--cc-text-tertiary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Cards — Compactos e limpos */
+  .upload-card {
+    background: var(--cc-surface);
+    border: 1px solid var(--cc-border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+
+  .upload-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .upload-card-title {
+    font-family: var(--cc-font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--cc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 10px 0;
+  }
+
+  .upload-card-list {
+    font-family: var(--cc-font-body);
+    font-size: 0.875rem;
     color: var(--cc-text-secondary);
     line-height: 1.6;
-    max-width: 480px;
+    margin: 0;
+    padding-left: 18px;
   }
 
-  .upload-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 32px;
-    align-items: start;
+  .upload-card-list li {
+    margin-bottom: 4px;
   }
 
-  .upload-left {
+  .upload-card-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .upload-card-list strong {
+    font-weight: 500;
+    color: var(--cc-text);
+  }
+
+  /* Tags → Pills compactos */
+  .upload-result-tags {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
+  .upload-result-tags li {
+    font-family: var(--cc-font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--cc-text-secondary);
+    background: var(--cc-bg-muted, var(--cc-bg));
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--cc-border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     COLUNA DIREITA — Ação (gap compacto)
+     ═══════════════════════════════════════════════════════════════════════ */
   .upload-right {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 
-  .upload-info-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--cc-text);
-    margin-bottom: 12px;
-  }
-
-  .upload-bullet-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--cc-text-secondary);
-    line-height: 1.6;
-  }
-
-  .upload-bullet-list li::before {
-    content: '→';
-    margin-right: 8px;
-    color: var(--cc-primary);
-  }
-
-  .upload-download-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* ═══════════════════════════════════════════════════════════════════════
+     UPLOAD ZONE — Dropzones com vida
+     ═══════════════════════════════════════════════════════════════════════ */
+  .upload-zone-wrapper {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    font-size: 14px;
-    color: var(--cc-text-secondary);
   }
 
-  .upload-download-list li {
+  .upload-zone-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    /* Mesmo line-height que o H1 para alinhamento */
+    line-height: 1;
+  }
+
+  .upload-zone-label {
+    font-family: var(--cc-font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--cc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  .upload-zone-sublabel {
+    font-family: var(--cc-font-body);
+    font-size: 0.8125rem;
+    color: var(--cc-text-tertiary);
+    line-height: 1;
+  }
+
+  /* Dropzone — Compacto e elegante (140px) */
+  .zone {
+    position: relative;
+    min-height: 140px;
+    padding: 24px;
+    background: var(--cc-surface);
+    border: 2px dashed var(--cc-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 180ms ease;
     display: flex;
     align-items: center;
-  }
-
-  .upload-illustration {
-    display: flex;
     justify-content: center;
-    padding: 20px;
   }
 
-  /* Tablet */
+  .zone:hover {
+    border-style: solid;
+    border-color: var(--cc-primary);
+    background: var(--cc-primary-light);
+    transform: scale(1.005);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .zone--dragging {
+    border-style: solid;
+    border-color: var(--cc-primary);
+    background: var(--cc-primary-light);
+    transform: scale(1.01);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .zone--has-file {
+    cursor: default;
+    border-style: solid;
+    border-color: var(--cc-border);
+    border-width: 1px;
+    min-height: 80px;
+    background: var(--cc-surface);
+  }
+
+  .zone--error {
+    border-color: var(--cc-error);
+  }
+
+  /* Ícone — Tamanho equilibrado */
+  .zone-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--cc-bg-muted, var(--cc-bg));
+    border-radius: 10px;
+    flex-shrink: 0;
+    transition: all 180ms ease;
+  }
+
+  .zone:hover .zone-icon {
+    background: var(--cc-primary-light);
+  }
+
+  .zone-icon svg {
+    color: var(--cc-text-tertiary);
+    width: 24px;
+    height: 24px;
+  }
+
+  .zone:hover .zone-icon svg {
+    color: var(--cc-primary);
+  }
+
+  /* Zone Empty State */
+  .zone-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .zone-empty-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .zone-empty-cta {
+    font-family: var(--cc-font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--cc-text-secondary);
+  }
+  
+  .zone:hover .zone-empty-cta {
+    color: var(--cc-primary);
+  }
+
+  /* Zone File State */
+  .zone-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .zone-file-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .zone-file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .zone-file-name {
+    font-family: var(--cc-font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--cc-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
+
+  .zone-file-size {
+    font-family: var(--cc-font-mono);
+    font-size: 0.75rem;
+    color: #94A3B8;
+  }
+
+  .zone-file-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .zone-status {
+    font-family: var(--cc-font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+
+  .zone-status--success {
+    color: #059669;
+    background: #ECFDF5;
+  }
+
+  .zone-status--warning {
+    color: #D97706;
+    background: #FFFBEB;
+  }
+
+  .zone-status--error {
+    color: var(--cc-error);
+    background: var(--cc-danger-light);
+  }
+
+  .zone-link {
+    font-family: var(--cc-font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--cc-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .zone-link:hover {
+    color: var(--cc-primary-hover);
+  }
+
+  .zone-link--remove {
+    color: var(--cc-text-tertiary);
+  }
+
+  .zone-link--remove:hover {
+    color: var(--cc-error);
+  }
+
+  /* Loading bar */
+  .zone-loading {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--cc-primary);
+    animation: zone-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes zone-loading {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .upload-zone-meta {
+    font-family: var(--cc-font-mono);
+    font-size: 0.6875rem;
+    color: var(--cc-text-tertiary);
+  }
+
+  .upload-zone-error {
+    font-family: var(--cc-font-body);
+    font-size: 0.75rem;
+    color: var(--cc-error);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ACTION — Botão Compacto (altura 48px)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .upload-action {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    
+    font-family: var(--cc-font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    
+    color: #FFFFFF;
+    background: var(--cc-primary);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    
+    transition: all 180ms ease;
+  }
+
+  .upload-btn:hover:not(:disabled) {
+    background: var(--cc-primary-hover);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .upload-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* Disabled State */
+  .upload-btn:disabled {
+    background: var(--cc-border);
+    color: var(--cc-text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .upload-action-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--cc-font-body);
+    font-size: 0.75rem;
+    color: var(--cc-text-muted);
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     RESPONSIVO — Mobile: Cards primeiro, Instruções depois
+     ═══════════════════════════════════════════════════════════════════════ */
   @media (max-width: 900px) {
+    .upload {
+      margin-top: 0;
+    }
+
     .upload-grid {
-      grid-template-columns: 1fr;
-      gap: 24px;
+      flex-direction: column;
+      gap: 28px;
+      align-items: stretch;
     }
 
+    /* Mobile: Cards (direita) aparecem PRIMEIRO */
     .upload-right {
-      order: 2;
+      flex: none;
+      width: 100%;
+      order: 1;
     }
-  }
 
-  /* Mobile */
-  @media (max-width: 640px) {
-    .upload-header {
-      margin-bottom: 24px;
+    /* Mobile: Instruções (esquerda) aparecem DEPOIS */
+    .upload-left {
+      flex: none;
+      width: 100%;
+      order: 2;
     }
 
     .upload-title {
-      font-size: 1.5rem;
+      font-size: 1.375rem;
+    }
+
+    .upload-header {
+      margin-bottom: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .upload {
+      min-height: auto;
+      padding: 16px 0;
+    }
+
+    .upload-title {
+      font-size: 1.25rem;
     }
 
     .upload-subtitle {
-      font-size: 14px;
+      font-size: 0.8125rem;
     }
 
-    .upload-grid {
-      gap: 16px;
+    .upload-card {
+      padding: 14px 16px;
     }
 
-    .upload-left {
-      gap: 16px;
+    .zone {
+      min-height: 120px;
+      padding: 20px;
     }
 
-    .upload-right {
-      gap: 12px;
+    .zone:hover {
+      transform: none;
     }
 
-    .upload-illustration {
-      padding: 16px;
+    .zone-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    .zone-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .zone-file {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .zone-file-name {
+      max-width: 200px;
+    }
+
+    .upload-btn {
+      height: 48px;
+    }
+
+    .upload-result-tags li {
+      font-size: 0.6875rem;
+      padding: 4px 10px;
     }
   }
 `

@@ -1,0 +1,248 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": "2.0.0",
+  "description": "Bateria de massas de teste para PrefeituraExtractor - CSV, XLSX, PDF, DOCX",
+  "testCases": [
+    {
+      "id": "csv-01-separador-virgula",
+      "file": "csv/01-separador-virgula.csv",
+      "kind": "csv",
+      "format": "csv_report_v1",
+      "description": "CSV com separador vírgula e valores no formato 1.234,56",
+      "expected": {
+        "success": true,
+        "minRows": 5,
+        "minYield": 0.9,
+        "competencia": "01/2026",
+        "sampleMatriculas": ["85-1", "123-4", "456-12"],
+        "sampleValores": [1234.56, 789.01, 2500.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "csv-02-separador-ponto-virgula",
+      "file": "csv/02-separador-ponto-virgula.csv",
+      "kind": "csv",
+      "format": "csv_report_v1",
+      "description": "CSV com separador ponto-e-vírgula",
+      "expected": {
+        "success": true,
+        "minRows": 5,
+        "minYield": 0.9,
+        "competencia": "02/2026",
+        "sampleMatriculas": ["100-1", "200-2", "300-3"],
+        "sampleValores": [500.00, 1000.00, 1500.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "csv-03-matricula-irregular",
+      "file": "csv/03-matricula-irregular.csv",
+      "kind": "csv",
+      "format": "csv_report_v1",
+      "description": "CSV com matrículas irregulares",
+      "expected": {
+        "success": true,
+        "minRows": 4,
+        "minYield": 0.8,
+        "competencia": "03/2026",
+        "sampleMatriculas": ["123-4", "1-1"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "csv-04-valores-rs",
+      "file": "csv/04-valores-rs.csv",
+      "kind": "csv",
+      "format": "csv_report_v1",
+      "description": "CSV com valores no formato R$ 500,00",
+      "expected": {
+        "success": true,
+        "minRows": 4,
+        "minYield": 0.9,
+        "competencia": "04/2026",
+        "sampleMatriculas": ["50-1", "60-2", "70-3"],
+        "sampleValores": [500.00, 600.00, 700.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "xlsx-01-cabecalho-variado",
+      "file": "xlsx/01-cabecalho-variado.xlsx",
+      "kind": "xlsx",
+      "format": "xlsx_table_v1",
+      "description": "XLSX com headers variáveis (MAT, VALOR)",
+      "expected": {
+        "success": true,
+        "minRows": 5,
+        "minYield": 0.9,
+        "competencia": "01/2026",
+        "sampleMatriculas": ["10-1", "20-2", "30-3"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "xlsx-02-planilha-errada-primeiro",
+      "file": "xlsx/02-planilha-errada-primeiro.xlsx",
+      "kind": "xlsx",
+      "format": "xlsx_table_v1",
+      "description": "XLSX onde a planilha com dados NÃO é a primeira",
+      "expected": {
+        "success": true,
+        "minRows": 3,
+        "minYield": 0.9,
+        "competencia": "02/2026",
+        "sampleMatriculas": ["111-1", "222-2"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "xlsx-03-valor-texto-numero",
+      "file": "xlsx/03-valor-texto-numero.xlsx",
+      "kind": "xlsx",
+      "format": "xlsx_table_v1",
+      "description": "XLSX com valores como texto e número",
+      "expected": {
+        "success": true,
+        "minRows": 4,
+        "minYield": 0.8,
+        "competencia": "03/2026",
+        "sampleMatriculas": ["50-1", "60-2"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-pdf-01-ok",
+      "file": "text/pdf-01-text-ok.txt",
+      "kind": "text",
+      "format": "pdf_text_report_v1",
+      "description": "PDF texto bem estruturado (simulado)",
+      "expected": {
+        "success": true,
+        "minRows": 5,
+        "minYield": 0.9,
+        "competencia": "01/2026",
+        "sampleMatriculas": ["1-1", "2-1", "3-1"],
+        "sampleValores": [100.00, 200.00, 300.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-pdf-02-mixed",
+      "file": "text/pdf-02-mixed-lowtext.txt",
+      "kind": "text",
+      "format": "pdf_text_report_v1",
+      "description": "PDF com colunas separadas (simulado)",
+      "expected": {
+        "success": true,
+        "minRows": 3,
+        "minYield": 0.5,
+        "competencia": "02/2026",
+        "mustHaveDiagnostics": ["TEXT_COLUMN_MISMATCH"]
+      }
+    },
+    {
+      "id": "text-pdf-03-scan",
+      "file": "text/pdf-03-scan-empty.txt",
+      "kind": "text",
+      "format": "pdf_text_report_v1",
+      "description": "PDF escaneado sem texto (simulado)",
+      "expected": {
+        "success": false,
+        "minRows": 0,
+        "minYield": 0,
+        "mustHaveDiagnostics": ["TEXT_ZERO_ROWS"]
+      }
+    },
+    {
+      "id": "text-docx-01-table",
+      "file": "text/docx-01-table-ok.txt",
+      "kind": "text",
+      "format": "docx_text_report_v1",
+      "description": "DOCX com tabela bem estruturada (simulado)",
+      "expected": {
+        "success": true,
+        "minRows": 5,
+        "minYield": 0.9,
+        "competencia": "01/2026",
+        "sampleMatriculas": ["100-1", "200-2", "300-3"],
+        "sampleValores": [1000.00, 2000.00, 3000.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-docx-02-text",
+      "file": "text/docx-02-text-ok.txt",
+      "kind": "text",
+      "format": "docx_text_report_v1",
+      "description": "DOCX com texto corrido (simulado)",
+      "expected": {
+        "success": true,
+        "minRows": 4,
+        "minYield": 0.8,
+        "competencia": "02/2026",
+        "sampleMatriculas": ["10-1", "20-2"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-docx-03-broken",
+      "file": "text/docx-03-table-broken.txt",
+      "kind": "text",
+      "format": "docx_text_report_v1",
+      "description": "DOCX com tabela quebrada (simulado)",
+      "expected": {
+        "success": true,
+        "minRows": 2,
+        "minYield": 0.5,
+        "competencia": "03/2026",
+        "mustHaveDiagnostics": ["TEXT_COLUMN_MISMATCH"]
+      }
+    },
+    {
+      "id": "text-mixed-01-multiplos-valores",
+      "file": "text/mixed-01-multiplos-valores.txt",
+      "kind": "text",
+      "format": "text_report",
+      "description": "Texto com múltiplos valores por linha (último não-zero)",
+      "expected": {
+        "success": true,
+        "minRows": 3,
+        "minYield": 0.7,
+        "competencia": "05/2026",
+        "sampleMatriculas": ["10-1", "20-2", "40-4"],
+        "sampleValores": [400.49, 350.00, 800.00],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-mixed-02-sem-competencia",
+      "file": "text/mixed-02-sem-competencia.txt",
+      "kind": "text",
+      "format": "text_report",
+      "description": "Texto sem competência detectável",
+      "expected": {
+        "success": true,
+        "minRows": 3,
+        "minYield": 0.9,
+        "mustHaveDiagnostics": ["TEXT_COMPETENCIA_NOT_FOUND"],
+        "mustNotHaveErrors": true
+      }
+    },
+    {
+      "id": "text-mixed-03-sem-evento",
+      "file": "text/mixed-03-sem-evento.txt",
+      "kind": "text",
+      "format": "text_report",
+      "description": "Texto sem evento detectável",
+      "expected": {
+        "success": true,
+        "minRows": 4,
+        "minYield": 0.9,
+        "competencia": "06/2026",
+        "mustHaveDiagnostics": ["TEXT_EVENT_NOT_FOUND"],
+        "mustNotHaveErrors": true
+      }
+    }
+  ]
+}
