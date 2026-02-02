@@ -4,6 +4,7 @@ import type {
   ReconciliationItem,
   DiagnosticsItem,
 } from '../domain/types'
+import { getBancoFromEvento } from '../domain/bancos'
 
 /**
  * Exportador de relatório de reconciliação para Excel (.xlsx)
@@ -127,8 +128,9 @@ export class ExcelExporter {
       { header: 'Matrícula', key: 'matricula', width: 12 },
       { header: 'Nome', key: 'nome', width: 35 },
       { header: 'CPF', key: 'cpf', width: 16 },
-      { header: 'Banco (R$)', key: 'banco', width: 15 },
-      { header: 'Prefeitura (R$)', key: 'prefeitura', width: 15 },
+      { header: 'Banco/Consig', key: 'bancoConsig', width: 18 },
+      { header: 'Valor Banco (R$)', key: 'banco', width: 15 },
+      { header: 'Valor Pref. (R$)', key: 'prefeitura', width: 15 },
       { header: 'Diferença (R$)', key: 'diferenca', width: 15 },
       { header: 'Observação', key: 'obs', width: 40 },
     ]
@@ -151,11 +153,17 @@ export class ExcelExporter {
           ? item.valorBanco - item.valorPrefeitura
           : null
 
+      // Obter nome do banco a partir do evento
+      const bancoConsig = item.evento 
+        ? getBancoFromEvento(item.evento) || `Evento ${item.evento}`
+        : ''
+
       const row = sheet.addRow({
         status: this.formatStatus(item.status),
         matricula: item.matricula,
         nome: item.nome || '',
         cpf: item.cpf || '',
+        bancoConsig: bancoConsig,
         banco: item.valorBanco,
         prefeitura: item.valorPrefeitura,
         diferenca: diferenca,
