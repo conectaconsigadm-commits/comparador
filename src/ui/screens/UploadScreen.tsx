@@ -527,7 +527,7 @@ function getFileIcon(filename: string) {
 function TxtIconSmall() {
   return (
     <div className="zone-icon-small zone-icon-txt">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
         <polyline points="14 2 14 8 20 8" />
         <line x1="8" y1="13" x2="16" y2="13" />
@@ -540,7 +540,7 @@ function TxtIconSmall() {
 function ExcelIconSmall() {
   return (
     <div className="zone-icon-small zone-icon-excel">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#107C41" />
         <polyline points="14 2 14 8 20 8" fill="#21A366" stroke="#21A366" strokeWidth="1" />
         <text x="12" y="16" fontSize="7" fontWeight="bold" textAnchor="middle" fill="white">X</text>
@@ -552,7 +552,7 @@ function ExcelIconSmall() {
 function CsvIconSmall() {
   return (
     <div className="zone-icon-small zone-icon-csv">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#107C41" />
         <polyline points="14 2 14 8 20 8" fill="#21A366" stroke="#21A366" strokeWidth="1" />
         <text x="12" y="16" fontSize="5" fontWeight="bold" textAnchor="middle" fill="white">CSV</text>
@@ -564,7 +564,7 @@ function CsvIconSmall() {
 function PdfIconSmall() {
   return (
     <div className="zone-icon-small zone-icon-pdf">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#DC2626" />
         <polyline points="14 2 14 8 20 8" fill="#EF4444" stroke="#EF4444" strokeWidth="1" />
         <text x="12" y="16" fontSize="5" fontWeight="bold" textAnchor="middle" fill="white">PDF</text>
@@ -576,9 +576,9 @@ function PdfIconSmall() {
 function WordIconSmall() {
   return (
     <div className="zone-icon-small zone-icon-word">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#2563EB" />
-        <polyline points="14 2 14 8 20 8" fill="#3B82F6" stroke="#3B82F6" strokeWidth="1" />
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#1F2937" />
+        <polyline points="14 2 14 8 20 8" fill="#374151" stroke="#374151" strokeWidth="1" />
         <text x="12" y="16" fontSize="7" fontWeight="bold" textAnchor="middle" fill="white">W</text>
       </svg>
     </div>

@@ -36,11 +36,11 @@
   --cc-border-dark: #111111;
   --cc-border-hover: #CCCCCC;
   
-  /* ▸ Primary — Azul Link (usado com parcimônia) */
-  --cc-primary: #1A73E8;
-  --cc-primary-hover: #1557B0;
-  --cc-primary-light: rgba(26, 115, 232, 0.08);
-  --cc-primary-muted: rgba(26, 115, 232, 0.06);
+  /* ▸ Primary — Verde Escuro (compatível com o tom bege) */
+  --cc-primary: #1F2937;
+  --cc-primary-hover: #111827;
+  --cc-primary-light: rgba(31, 41, 55, 0.08);
+  --cc-primary-muted: rgba(31, 41, 55, 0.06);
   
   /* ▸ Semantic — Cores funcionais */
   --cc-success: #137333;
@@ -143,11 +143,11 @@ html[data-theme="dark"] {
   --cc-border-dark: #F8FAFC;
   --cc-border-hover: #4A5568;
   
-  /* ▸ Primary — Azul brilhante no dark */
-  --cc-primary: #60A5FA;
-  --cc-primary-hover: #93C5FD;
-  --cc-primary-light: rgba(96, 165, 250, 0.15);
-  --cc-primary-muted: rgba(96, 165, 250, 0.1);
+  /* ▸ Primary — Cinza claro no dark */
+  --cc-primary: #E5E7EB;
+  --cc-primary-hover: #F3F4F6;
+  --cc-primary-light: rgba(229, 231, 235, 0.15);
+  --cc-primary-muted: rgba(229, 231, 235, 0.1);
   
   /* ▸ Semantic — Cores vibrantes para dark */
   --cc-success: #4ADE80;

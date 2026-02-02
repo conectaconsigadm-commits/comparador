@@ -123,6 +123,7 @@ const tabsCSS = `
     color: var(--cc-text);
     background: var(--cc-surface-solid);
     box-shadow: var(--cc-shadow-sm);
+    border-bottom: 2px solid var(--cc-text);
   }
 
   .segmented-label {
