@@ -15,6 +15,8 @@ interface RowData {
   valor: Money
   nome?: string
   cpf?: string
+  evento?: string
+  meta?: NormalizedRow['meta']
 }
 
 /**
@@ -85,7 +87,7 @@ export class Reconciler {
             status: 'bateu',
             nome: dadoPref.nome,
             cpf: dadoPref.cpf,
-            evento: dadoPref.meta?.evento,
+            evento: dadoPref.evento,
           })
           bateuCount++
 
@@ -117,7 +119,7 @@ export class Reconciler {
             obs: `Diferença: R$ ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}`,
             nome: dadoPref.nome,
             cpf: dadoPref.cpf,
-            evento: dadoPref.meta?.evento,
+            evento: dadoPref.evento,
           })
           divergenteCount++
         }
@@ -145,7 +147,7 @@ export class Reconciler {
           status: 'so_na_prefeitura',
           nome: dado.nome,
           cpf: dado.cpf,
-          evento: dado.meta?.evento,
+          evento: dado.evento,
         })
         soNaPrefeituraCount++
       }
@@ -212,8 +214,10 @@ export class Reconciler {
       const existing = map.get(row.matricula) || []
       existing.push({
         valor: row.valor,
-        nome: row.meta?.nome,
-        cpf: row.meta?.cpf,
+        nome: row.nome,
+        cpf: row.cpf,
+        evento: row.meta?.evento,
+        meta: row.meta,
       })
       map.set(row.matricula, existing)
     }
