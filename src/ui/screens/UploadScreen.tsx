@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type DragEvent, type ChangeEvent } from 'r
 import { InlineBanner } from '../components/InlineBanner'
 import { BankParser } from '../../core/bank/BankParser'
 import { PrefeituraExtractor } from '../../core/prefeitura/PrefeituraExtractor'
-import { getFormatoNome } from '../../core/domain/bancos'
+// import { getFormatoNome } from '../../core/domain/bancos'
 import type { BankParsedData, PrefeituraParsedData } from '../state/appState'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -390,11 +390,6 @@ function UploadZone({
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-
-  const getFileExtension = (filename: string): string => {
-    const ext = filename.split('.').pop()?.toUpperCase() || ''
-    return ext
   }
 
   const zoneClass = [

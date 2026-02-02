@@ -152,7 +152,7 @@ function escapeRegex(str: string): string {
 function extractNomeCpf(
   line: string, 
   delimiter: CsvDelimiter, 
-  matricula: string
+  _matricula: string
 ): { nome?: string; cpf?: string } {
   // Dividir a linha pelo delimitador
   const parts = splitByDelimiter(line, delimiter)
