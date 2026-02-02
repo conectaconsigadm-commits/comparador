@@ -111,6 +111,8 @@ export interface ReconciliationItem {
   nome?: string
   /** CPF do trabalhador (da prefeitura, quando disponível) */
   cpf?: string
+  /** Código do evento/banco (002, 015, 135, etc) */
+  evento?: string
 }
 
 /** Qualidade da extração */

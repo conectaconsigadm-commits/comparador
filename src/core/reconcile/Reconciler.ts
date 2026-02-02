@@ -85,6 +85,7 @@ export class Reconciler {
             status: 'bateu',
             nome: dadoPref.nome,
             cpf: dadoPref.cpf,
+            evento: dadoPref.meta?.evento,
           })
           bateuCount++
 
@@ -116,6 +117,7 @@ export class Reconciler {
             obs: `Diferença: R$ ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}`,
             nome: dadoPref.nome,
             cpf: dadoPref.cpf,
+            evento: dadoPref.meta?.evento,
           })
           divergenteCount++
         }
@@ -143,6 +145,7 @@ export class Reconciler {
           status: 'so_na_prefeitura',
           nome: dado.nome,
           cpf: dado.cpf,
+          evento: dado.meta?.evento,
         })
         soNaPrefeituraCount++
       }

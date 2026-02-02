@@ -19,6 +19,11 @@ const MATRICULA_REGEX_START = /^\s*(\d{1,6}-\d{1,3})\s*[,;\t|]/
 const MATRICULA_REGEX_ANYWHERE = /\b(\d{1,6}-\d{1,3})\b/
 
 /**
+ * Regex para CPF: 000.000.000-00
+ */
+const CPF_REGEX = /(\d{3})[.\s]?(\d{3})[.\s]?(\d{3})[-.\s]?(\d{2})/
+
+/**
  * Regex para valores monetários BR:
  * a) entre aspas: "1.234,56"
  * b) sem aspas: 1.234,56 ou 1234,56
@@ -141,6 +146,73 @@ function escapeRegex(str: string): string {
 }
 
 /**
+ * Extrai nome e CPF de uma linha CSV
+ * Formato esperado: matricula,nome,,,,,,,cpf,,,,,valor
+ */
+function extractNomeCpf(
+  line: string, 
+  delimiter: CsvDelimiter, 
+  matricula: string
+): { nome?: string; cpf?: string } {
+  // Dividir a linha pelo delimitador
+  const parts = splitByDelimiter(line, delimiter)
+  
+  let nome: string | undefined
+  let cpf: string | undefined
+
+  // Procurar CPF em qualquer posição
+  for (const part of parts) {
+    const cpfMatch = part.match(CPF_REGEX)
+    if (cpfMatch) {
+      cpf = `${cpfMatch[1]}.${cpfMatch[2]}.${cpfMatch[3]}-${cpfMatch[4]}`
+      break
+    }
+  }
+
+  // Nome geralmente é a segunda coluna (depois da matrícula)
+  // Procurar a primeira coluna que parece um nome (texto com espaço, sem números)
+  for (let i = 1; i < Math.min(parts.length, 5); i++) {
+    const part = parts[i].trim().replace(/^"|"$/g, '')
+    if (
+      part.length >= 5 &&
+      part.includes(' ') &&
+      /^[A-Za-zÀ-ÿ\s]+$/.test(part)
+    ) {
+      nome = part
+      break
+    }
+  }
+
+  return { nome, cpf }
+}
+
+/**
+ * Divide linha por delimitador, respeitando aspas
+ */
+function splitByDelimiter(line: string, delimiter: CsvDelimiter): string[] {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+
+    if (char === '"') {
+      inQuotes = !inQuotes
+      current += char
+    } else if (char === delimiter && !inQuotes) {
+      result.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+
+  result.push(current)
+  return result
+}
+
+/**
  * Extrai dados do relatório CSV "Relação de Trabalhadores por Evento"
  *
  * Formato esperado:
@@ -253,11 +325,16 @@ export function extractFromCsvReport(text: string): CsvReportExtractionResult {
       continue
     }
 
+    // Extrair nome e CPF da linha
+    const { nome, cpf } = extractNomeCpf(trimmedLine, delimiter, matricula)
+
     // Criar NormalizedRow
     const row: NormalizedRow = {
       source: 'prefeitura',
       matricula,
       valor,
+      nome,
+      cpf,
       meta: {
         competencia: competenciaFound,
         evento: eventoAtual,

@@ -1,4 +1,5 @@
 import type { ReconciliationItem } from '../../core/domain/types'
+import { getBancoFromEvento } from '../../core/domain/bancos'
 
 interface ResultTableProps {
   items: ReconciliationItem[]
@@ -15,6 +16,13 @@ export function ResultTable({ items }: ResultTableProps) {
       style: 'currency',
       currency: 'BRL',
     })
+  }
+
+  const getBanco = (item: ReconciliationItem): string => {
+    const evento = item.evento
+    if (!evento) return '—'
+    const banco = getBancoFromEvento(evento)
+    return banco || `Evento ${evento}`
   }
 
   // Status → Texto colorido (sem badges)
@@ -59,8 +67,9 @@ export function ResultTable({ items }: ResultTableProps) {
             <th>Matrícula</th>
             <th>Nome</th>
             <th>CPF</th>
-            <th className="ledger-th-money">Banco</th>
-            <th className="ledger-th-money">Prefeitura</th>
+            <th>Banco/Consig</th>
+            <th className="ledger-th-money">Valor Banco</th>
+            <th className="ledger-th-money">Valor Pref.</th>
             <th>Obs</th>
           </tr>
         </thead>
@@ -71,6 +80,7 @@ export function ResultTable({ items }: ResultTableProps) {
               <td className="ledger-mono">{item.matricula}</td>
               <td className="ledger-name">{item.nome || '—'}</td>
               <td className="ledger-mono ledger-cpf">{item.cpf || '—'}</td>
+              <td className="ledger-banco">{getBanco(item)}</td>
               <td className={`ledger-mono ledger-money ${hasDivergence(item) ? 'status-diverge' : ''}`}>
                 {formatMoney(item.valorBanco)}
               </td>
@@ -191,6 +201,13 @@ const tableCSS = `
     max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ledger-banco {
+    font-family: var(--cc-font-body);
+    font-size: 0.75rem;
+    color: var(--cc-text-secondary);
     white-space: nowrap;
   }
 

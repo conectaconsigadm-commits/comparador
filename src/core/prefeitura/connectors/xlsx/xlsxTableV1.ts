@@ -106,7 +106,22 @@ export async function extractFromXlsx(file: File): Promise<XlsxExtractionResult>
     let discarded = 0
     let eventoAtual: string | undefined
 
+    // Regex para detectar linha de evento: "Evento: 002" ou "Evento:  002 - CONSIGNADO"
+    const eventoLineRegex = /Evento:\s*(\d{1,3})/i
+
     for (const row of data) {
+      // Verificar se alguma célula da linha contém "Evento: XXX"
+      for (const cell of row) {
+        if (cell !== null) {
+          const cellStr = String(cell)
+          const eventoMatch = cellStr.match(eventoLineRegex)
+          if (eventoMatch) {
+            eventoAtual = eventoMatch[1].padStart(3, '0')
+            break
+          }
+        }
+      }
+
       // Tentar extrair evento da coluna de evento (se existir)
       if (columns.eventoCol !== undefined && row[columns.eventoCol] !== null) {
         const evtVal = String(row[columns.eventoCol]).trim()

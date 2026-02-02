@@ -138,8 +138,11 @@ export function ResultScreen({
             placeholder="Buscar matrícula, nome ou CPF"
           />
           <div className="result-match-rate">
-            <span className="match-label">Taxa de match</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             <span className="match-value">{summary.taxaMatch?.toFixed(1) || 0}%</span>
+            <span className="match-label">match</span>
           </div>
         </div>
 
@@ -310,35 +313,35 @@ const resultCSS = `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
     margin-bottom: 16px;
     flex-wrap: wrap;
   }
 
   .result-match-rate {
     display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 12px 20px;
-    background: var(--cc-primary-light);
-    border-radius: 12px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--cc-success-light);
+    border: 1px solid var(--cc-success);
+    border-radius: 8px;
   }
 
   .match-label {
     font-family: var(--cc-font-body);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
-    color: var(--cc-text-secondary);
+    color: var(--cc-success);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
   }
 
   .match-value {
-    font-family: var(--cc-font-mono);
-    font-size: 1.5rem;
+    font-family: var(--cc-font-body);
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--cc-primary);
-    letter-spacing: -0.02em;
+    color: var(--cc-success);
   }
 
   /* ═══════════════════════════════════════════════════════════════════════

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type DragEvent, type ChangeEvent } from 'r
 import { InlineBanner } from '../components/InlineBanner'
 import { BankParser } from '../../core/bank/BankParser'
 import { PrefeituraExtractor } from '../../core/prefeitura/PrefeituraExtractor'
+import { getFormatoNome } from '../../core/domain/bancos'
 import type { BankParsedData, PrefeituraParsedData } from '../state/appState'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -268,7 +269,7 @@ export function UploadScreen({
             }
             meta={
               prefStats?.competencia
-                ? `Competência: ${prefStats.competencia} · Formato: ${prefStats.formato}`
+                ? `Competência: ${prefStats.competencia}`
                 : undefined
             }
           />
@@ -430,12 +431,9 @@ function UploadZone({
         {file ? (
           <div className="zone-file">
             <div className="zone-file-info">
-              {icon === 'txt' ? <TxtIconSmall /> : <SheetIconSmall />}
+              {getFileIcon(file.name)}
               <div className="zone-file-details">
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span className="zone-file-name" title={file.name}>{file.name}</span>
-                  <span className="zone-file-type">{getFileExtension(file.name)}</span>
-                </div>
+                <span className="zone-file-name" title={file.name}>{file.name}</span>
                 <span className="zone-file-size">{formatSize(file.size)}</span>
               </div>
             </div>
@@ -481,7 +479,8 @@ function TxtIcon() {
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
         <polyline points="14 2 14 8 20 8" />
-        <text x="12" y="16" fontSize="6" fontWeight="bold" textAnchor="middle" fill="currentColor" stroke="none">TXT</text>
+        <line x1="8" y1="13" x2="16" y2="13" />
+        <line x1="8" y1="17" x2="16" y2="17" />
       </svg>
     </div>
   )
@@ -502,13 +501,33 @@ function SheetIcon() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ÍCONES — Pequenos para arquivo carregado
+// ÍCONES — Por tipo de arquivo (coloridos)
 // ═══════════════════════════════════════════════════════════════════════════
+
+function getFileIcon(filename: string) {
+  const ext = filename.split('.').pop()?.toLowerCase() || ''
+  
+  switch (ext) {
+    case 'xlsx':
+    case 'xls':
+      return <ExcelIconSmall />
+    case 'csv':
+      return <CsvIconSmall />
+    case 'pdf':
+      return <PdfIconSmall />
+    case 'docx':
+    case 'doc':
+      return <WordIconSmall />
+    case 'txt':
+    default:
+      return <TxtIconSmall />
+  }
+}
 
 function TxtIconSmall() {
   return (
-    <div className="zone-icon-small">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <div className="zone-icon-small zone-icon-txt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
         <polyline points="14 2 14 8 20 8" />
         <line x1="8" y1="13" x2="16" y2="13" />
@@ -518,15 +537,49 @@ function TxtIconSmall() {
   )
 }
 
-function SheetIconSmall() {
+function ExcelIconSmall() {
   return (
-    <div className="zone-icon-small">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <rect x="7" y="12" width="10" height="7" rx="1" fill="none" stroke="currentColor" strokeWidth="1" />
-        <line x1="10" y1="12" x2="10" y2="19" strokeWidth="1" />
-        <line x1="7" y1="15.5" x2="17" y2="15.5" strokeWidth="1" />
+    <div className="zone-icon-small zone-icon-excel">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#107C41" />
+        <polyline points="14 2 14 8 20 8" fill="#21A366" stroke="#21A366" strokeWidth="1" />
+        <text x="12" y="16" fontSize="7" fontWeight="bold" textAnchor="middle" fill="white">X</text>
+      </svg>
+    </div>
+  )
+}
+
+function CsvIconSmall() {
+  return (
+    <div className="zone-icon-small zone-icon-csv">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#107C41" />
+        <polyline points="14 2 14 8 20 8" fill="#21A366" stroke="#21A366" strokeWidth="1" />
+        <text x="12" y="16" fontSize="5" fontWeight="bold" textAnchor="middle" fill="white">CSV</text>
+      </svg>
+    </div>
+  )
+}
+
+function PdfIconSmall() {
+  return (
+    <div className="zone-icon-small zone-icon-pdf">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#DC2626" />
+        <polyline points="14 2 14 8 20 8" fill="#EF4444" stroke="#EF4444" strokeWidth="1" />
+        <text x="12" y="16" fontSize="5" fontWeight="bold" textAnchor="middle" fill="white">PDF</text>
+      </svg>
+    </div>
+  )
+}
+
+function WordIconSmall() {
+  return (
+    <div className="zone-icon-small zone-icon-word">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#2563EB" />
+        <polyline points="14 2 14 8 20 8" fill="#3B82F6" stroke="#3B82F6" strokeWidth="1" />
+        <text x="12" y="16" fontSize="7" fontWeight="bold" textAnchor="middle" fill="white">W</text>
       </svg>
     </div>
   )

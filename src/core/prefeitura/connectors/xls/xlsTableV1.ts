@@ -80,11 +80,13 @@ export async function extractFromXls(file: File): Promise<XlsExtractionResult> {
     diagnostics.push({
       severity: 'info',
       code: 'XLS_COLUMNS_DETECTED',
-      message: `Colunas detectadas: matrícula=${columns.matriculaCol}, valor=${columns.valorCol}`,
+      message: `Colunas: matrícula=${columns.matriculaCol}, valor=${columns.valorCol}${columns.nomeCol !== undefined ? `, nome=${columns.nomeCol}` : ''}${columns.cpfCol !== undefined ? `, cpf=${columns.cpfCol}` : ''}`,
       details: {
         matriculaCol: columns.matriculaCol,
         valorCol: columns.valorCol,
         eventoCol: columns.eventoCol,
+        nomeCol: columns.nomeCol,
+        cpfCol: columns.cpfCol,
         confidence: columns.confidence,
       },
     })
@@ -104,7 +106,22 @@ export async function extractFromXls(file: File): Promise<XlsExtractionResult> {
     let discarded = 0
     let eventoAtual: string | undefined
 
+    // Regex para detectar linha de evento: "Evento: 002" ou "Evento:  002 - CONSIGNADO"
+    const eventoLineRegex = /Evento:\s*(\d{1,3})/i
+
     for (const row of data) {
+      // Verificar se alguma célula da linha contém "Evento: XXX"
+      for (const cell of row) {
+        if (cell !== null) {
+          const cellStr = String(cell)
+          const eventoMatch = cellStr.match(eventoLineRegex)
+          if (eventoMatch) {
+            eventoAtual = eventoMatch[1].padStart(3, '0')
+            break
+          }
+        }
+      }
+
       // Tentar extrair evento da coluna de evento (se existir)
       if (columns.eventoCol !== undefined && row[columns.eventoCol] !== null) {
         const evtVal = String(row[columns.eventoCol]).trim()
@@ -127,10 +144,30 @@ export async function extractFromXls(file: File): Promise<XlsExtractionResult> {
         continue
       }
 
+      // Extrair nome (se coluna detectada)
+      let nome: string | undefined
+      if (columns.nomeCol !== undefined && row[columns.nomeCol] !== null) {
+        const nomeVal = String(row[columns.nomeCol]).trim()
+        if (nomeVal.length >= 3 && /^[A-Za-zÀ-ÿ\s]+$/.test(nomeVal)) {
+          nome = nomeVal
+        }
+      }
+
+      // Extrair CPF (se coluna detectada)
+      let cpf: string | undefined
+      if (columns.cpfCol !== undefined && row[columns.cpfCol] !== null) {
+        const cpfVal = String(row[columns.cpfCol]).replace(/\D/g, '')
+        if (cpfVal.length === 11) {
+          cpf = cpfVal.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+        }
+      }
+
       rows.push({
         source: 'prefeitura',
         matricula,
         valor,
+        nome,
+        cpf,
         meta: {
           competencia,
           evento: eventoAtual,
